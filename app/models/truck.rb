@@ -30,7 +30,7 @@ class Truck < ActiveRecord::Base
 	def get_tweets
         twitter_client = Truck.configure_twitter
         
-        twitter_client.user_timeline(twitter_user_name, :count=>200)
+        twitter_client.user_timeline(twitter_user_name, :count=>20)
 	end
 
     def get_profile_image
