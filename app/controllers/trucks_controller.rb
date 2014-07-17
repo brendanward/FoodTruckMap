@@ -5,6 +5,21 @@ class TrucksController < ApplicationController
   # GET /trucks.json
   def index
     @trucks = Truck.all
+    
+    for truck in @trucks
+        truck.geocode_truck
+    end
+    
+    @hash = Gmaps4rails.build_markers(@trucks) do |truck, marker|
+        marker.lat truck.latitude
+        marker.lng truck.longitude
+        marker.infowindow render_to_string(:partial => "/trucks/infowindow", :locals => { :truck => truck})
+        #marker.infowindow truck.get_profile_image
+        marker.picture({
+                       "url" => truck.get_profile_image,
+                       "width" =>  40,
+                       "height" => 40})
+    end
   end
 
   # GET /trucks/1
