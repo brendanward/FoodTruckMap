@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @truck.name %>
+</p>
+
+<p>
+  <strong>Twitter user name:</strong>
+  <%= @truck.twitter_user_name %>
+</p>
+
+<p>
+  <strong>Latitude:</strong>
+  <%= @truck.latitude %>
+</p>
+
+<p>
+  <strong>Longitude:</strong>
+  <%= @truck.longitude %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @truck.address %>
+</p>
+
+<p>
+  	<b>Tweets:</b><br>
+  	<% @truck.get_tweets.each do |tweet| %>
+    	<%= "#{tweet.id} :: #{tweet.created_at} :: #{tweet.text}"%>
+    	<b><%= "  :: #{@truck.contains_address(tweet.text)}" %></b>
+
+		<br>
+  	<% end %>
+</p>
+
+<%= link_to 'Edit', edit_truck_path(@truck) %> |
+<%= link_to 'Back', trucks_path %>
