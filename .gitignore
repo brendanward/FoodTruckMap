@@ -18,4 +18,5 @@
 .DS_Store
 
 # Ignore secret keys file.
-/config/secret.yml
+/config/secrets.yml
+/config/app.yml
