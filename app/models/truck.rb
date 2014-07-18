@@ -1,75 +1,76 @@
 class Truck < ActiveRecord::Base
     # attr_accessilble :name, :twitter_user_name, :address, :latitude, :longitude
-    attr_accessor :tweet
-    geocoded_by :address
+  attr_accessor :tweet
+  geocoded_by :address
    
 	def self.configure_twitter
-        twitter_client = Twitter::REST::Client.new do |config|
-			config.consumer_key = Foodtruckmap.config.twitter_consumer_key
-			config.consumer_secret = Foodtruckmap.config.twitter_consumer_secret
-			config.access_token = Foodtruckmap.config.twitter_access_token
-			config.access_token_secret = Foodtruckmap.config.twitter_access_token_secret
-		end
+    twitter_client = Twitter::REST::Client.new do |config|
+      config.consumer_key = Foodtruckmap.config.twitter_consumer_key
+      config.consumer_secret = Foodtruckmap.config.twitter_consumer_secret
+      config.access_token = Foodtruckmap.config.twitter_access_token
+      config.access_token_secret = Foodtruckmap.config.twitter_access_token_secret
+    end
 
-        return twitter_client
+    return twitter_client
 	end
 
-    def self.build_regexp
-        cardinalStreetNames = "[0-9]+#{RegExpType(CardinalSuffix)}?"
-        allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
-        fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
-        fullProperStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}"
-        intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
-        includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet)\\W*)?#{intersection}"
-        address = "[0-9]+\\W+#{fullProperStreetName}"
+  def self.build_regexp
+    cardinalStreetNames = "[0-9]+#{RegExpType(CardinalSuffix)}?"
+    allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
+    fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
+    fullProperStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}"
+    intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
+    includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet)\\W*)?#{intersection}"
+    address = "[0-9]+\\W+#{fullProperStreetName}"
 
-        finalRegExpString = "([^']\\b#{includeBetween}|#{address})\\b"
-        Regexp.new(finalRegExpString, Regexp::IGNORECASE)
+    finalRegExpString = "([^']\\b#{includeBetween}|#{address})\\b"
+    Regexp.new(finalRegExpString, Regexp::IGNORECASE)
+  end
+
+def get_tweets(number_of_tweets)
+    twitter_client = Truck.configure_twitter        
+    twitter_client.user_timeline(twitter_user_name, :count=>number_of_tweets)
+  end
+
+  def get_profile_image
+    if self.profile_image_url_last_updated == nil || (Time.now - self.profile_image_url_last_updated) > (60 * 60 * 24)
+      self.profile_image_url = Truck.configure_twitter.user(twitter_user_name).profile_image_url(size = :normal).to_s
+      self.profile_image_url_last_updated = Time.now
+      self.save
     end
+    
+    return self.profile_image_url
+  end
 
-	def get_tweets
-        twitter_client = Truck.configure_twitter
+  def contains_address(tweet_text)
+    Truck.build_regexp.match(tweet_text)
+  end
+
+  def extract_address(tweet_text)
+    match = Truck.build_regexp.match(tweet_text)
+    if match == nil
+      return ""
+    else
+      return match[0]
+    end
+  end
+
+  def get_most_recent_tweet_with_address
+    tweets = self.get_tweets(20)
+    
+    for tweet in tweets
+      if self.contains_address(tweet.text)
+        @tweet = tweet
+        self.last_address_tweet = tweet.text
+        self.last_address_tweet_time = tweet.created_at
+        self.last_address_update = Time.now
+        self.save
+        return tweet
+      end
+    end
         
-        twitter_client.user_timeline(twitter_user_name, :count=>20)
-	end
-
-    def get_profile_image
-        
-        if @tweet == nil
-            user = Truck.configure_twitter.user(twitter_user_name)
-        else
-            user = @tweet.user
-        end
-        
-        image_url = user.profile_image_url(size = :normal)
-
-        return image_url.to_s
-    end
-
-    def contains_address(tweet_text)
-        Truck.build_regexp.match(tweet_text)
-    end
-
-    def extract_address(tweet_text)
-        match = Truck.build_regexp.match(tweet_text)
-        if match == nil
-            return ""
-            else
-            return match[0]
-        end
-    end
-
-    def get_most_recent_tweet_with_address
-        tweets = self.get_tweets
-        for tweet in tweets
-            if self.contains_address(tweet.text)
-                @tweet = tweet
-                return tweet
-            end
-        end
-        
-        return ""
-    end
+    return ""
+  end
 
     def get_address
         tweet = self.get_most_recent_tweet_with_address
@@ -103,13 +104,15 @@ class Truck < ActiveRecord::Base
     end
 
     def update_address
+      if self.last_address_update == nil || (Time.now-self.last_address_update) > (5 * 60)
         new_address = self.add_city_to_address(self.get_address)
         if new_address != self.address
-            self.address = new_address
-            return true
-            else
-            return false
+          self.address = new_address
+          return true
+        else
+          return false
         end
+      end
     end
 
     def geocode_address(address)
@@ -150,21 +153,20 @@ class Truck < ActiveRecord::Base
             longitude = geocode[0].coordinates()[1]
             return [latitude,longitude]
         end
-    end
+  end
 
-    def geocode_truck
-        if self.update_address
-            if self.address.include?("between")
-                geocode = geocode_address(self.get_address)
-                
-                self.latitude = geocode[0]
-                self.longitude = geocode[1]
-                self.save
-                else
-                self.geocode
-                self.save
-            end
-        end
+  def geocode_truck
+    if self.update_address
+      if self.address.include?("between")
+        geocode = geocode_address(self.get_address)
+        self.latitude = geocode[0]
+        self.longitude = geocode[1]
+        self.save
+      else
+        self.geocode
+        self.save
+      end
     end
+  end
 
 end

@@ -40,7 +40,7 @@ StreetTypes =
 
 StreetPrefixSuffix = ["north","south","east","west","n","s","e","w","n.","s.","e.","w."]
 
-BrooklynNames = ["bk","brooklyn","dumbo"]
+BrooklynNames = ["bk","brooklyn","bklyn","dumbo","dumbonyc","downtownbklyn"]
 
 NewYorkStreetNames =
 [
@@ -192,5 +192,8 @@ NewYorkStreetNames =
 "hanover",
 "lincoln",
 "madison",
-"tompkins"
+  "mad",
+"tompkins",
+  "willoughby",
+  "myrtle"
 ]

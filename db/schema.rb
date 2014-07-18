@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140715234556) do
+ActiveRecord::Schema.define(version: 20140718201950) do
 
   create_table "trucks", force: true do |t|
     t.string   "name"
@@ -21,6 +21,11 @@ ActiveRecord::Schema.define(version: 20140715234556) do
     t.string   "address"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "last_address_tweet"
+    t.datetime "last_address_update"
+    t.string   "profile_image_url"
+    t.datetime "profile_image_url_last_updated"
+    t.datetime "last_address_tweet_time"
   end
 
 end
