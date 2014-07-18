@@ -25,6 +25,16 @@ class TrucksController < ApplicationController
   # GET /trucks/1
   # GET /trucks/1.json
   def show
+    truck = Truck.find(params[:id])
+    
+    @past_locations = truck.get_past_locations
+    
+    @hash = Gmaps4rails.build_markers(@past_locations) do |past_location, marker|
+      marker.lat past_location.latitude
+      marker.lng past_location.longitude
+      marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location})
+    end
+    
   end
 
   # GET /trucks/new
