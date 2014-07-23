@@ -1,19 +1,7 @@
 Rails.application.routes.draw do
-  get 'coordinate/index'
-
-  get 'coordinate/show'
-
-  get 'coordinate/new'
-
-  get 'coordinate/edit'
-
-  get 'coordinate/create'
-
-  get 'coordinate/update'
-
-  get 'coordinate/destroy'
 
   resources :trucks
+  resources :coordinates
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

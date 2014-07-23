@@ -97,6 +97,9 @@ class Truck < ActiveRecord::Base
     address = address.gsub(/bet\b/i," between ")
     address = address.sub("b/t "," between ")
     address = address.sub("b/w"," between ")
+    address = address.sub("b\\t "," between ")
+    address = address.sub("b\\w"," between ")
+    address = address.sub("betw"," between ")
     address = address.sub("/"," and ")
     address = address.sub("\\"," and ")
     address = address.strip
@@ -198,6 +201,7 @@ class Truck < ActiveRecord::Base
   def get_past_locations
     tweets = get_tweets(200)
     past_locations = Array.new
+    coordinate_hash = Hash.new
 
     for tweet in tweets
       address = extract_address(tweet.text)
@@ -207,18 +211,25 @@ class Truck < ActiveRecord::Base
         full_address = address + ", " + city
         truck_past_location = TruckPastLocation.new
         
-        coordinate = Coordinate.find_by address: full_address
-
+        coordinate = coordinate_hash[full_address]
+        
         if coordinate == nil
-          address_coordinate = geocode_address(address, city)
           
-          coordinate = Coordinate.new
+          coordinate = Coordinate.find_by address: full_address
+
+          if coordinate == nil
+            address_coordinate = geocode_address(address, city)
+
+            coordinate = Coordinate.new
+
+            coordinate.address = full_address
+            coordinate.latitude = address_coordinate[0]
+            coordinate.longitude = address_coordinate[1]
+
+            coordinate.save
+          end
           
-          coordinate.address = full_address
-          coordinate.latitude = address_coordinate[0]
-          coordinate.longitude = address_coordinate[1]
-          
-          coordinate.save
+          coordinate_hash[full_address] = coordinate
         end
         
         truck_past_location.latitude = coordinate.latitude
