@@ -61,7 +61,6 @@
   	<b>Tweets:</b><br>
   	<% @truck.get_tweets(200).each do |tweet| %>
     	<%= "#{tweet.id} :: #{tweet.created_at} :: #{tweet.text}"%>
-    	<b><%= "  :: #{@truck.contains_address(tweet.text)}" %></b>
 
 		<br>
   	<% end %>
@@ -72,9 +71,9 @@
 <script type='text/javascript'>
   handler = Gmaps.build('Google');
   handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
-    //markers = handler.addMarkers(<%=raw @hash.to_json %>);
-    //handler.bounds.extendWith(markers);
-    //handler.fitMapToBounds();
+    markers = handler.addMarkers(<%=raw @hash.to_json %>);
+    handler.bounds.extendWith(markers);
+    handler.fitMapToBounds();
     if(navigator.geolocation)
       navigator.geolocation.getCurrentPosition(displayOnMap);
   });

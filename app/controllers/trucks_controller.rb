@@ -6,9 +6,13 @@ class TrucksController < ApplicationController
   def index
     @trucks = Truck.all
     
+    @test = 5
+    
     for truck in @trucks
         truck.geocode_truck
     end
+    
+    @trucks = Truck.all
     
     @hash = Gmaps4rails.build_markers(@trucks) do |truck, marker|
         marker.lat truck.latitude
