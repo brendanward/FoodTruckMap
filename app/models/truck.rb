@@ -92,6 +92,7 @@ class Truck < ActiveRecord::Base
     address = address.gsub(/mad\b/i," Madison ")
     address = address.sub("&amp;"," and ")
     address = address.sub("@"," and ")
+    address = address.sub("betw "," between ")
     address = address.sub("btwn"," between")
     address = address.sub("btw"," between")
     address = address.gsub(/bet\b/i," between ")
@@ -99,7 +100,6 @@ class Truck < ActiveRecord::Base
     address = address.sub("b/w"," between ")
     address = address.sub("b\\t "," between ")
     address = address.sub("b\\w"," between ")
-    address = address.sub("betw"," between ")
     address = address.sub("/"," and ")
     address = address.sub("\\"," and ")
     address = address.strip
