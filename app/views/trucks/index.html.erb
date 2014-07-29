@@ -6,11 +6,21 @@
 </div>
 
 <script type='text/javascript'>
-handler = Gmaps.build('Google');
-handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
-  markers = handler.addMarkers(<%=raw @hash.to_json %>);
-  handler.bounds.extendWith(markers);
-  handler.fitMapToBounds();
+  handler = Gmaps.build('Google');
+  handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
+    markers = handler.addMarkers(<%=raw @hash.to_json %>);
+    handler.bounds.extendWith(markers);
+    handler.fitMapToBounds();
+    if(navigator.geolocation);
+      navigator.geolocation.getCurrentPosition(displayOnMap);
+  
+  function displayOnMap(position){
+    var marker = handler.addMarker({
+      lat: position.coords.latitude,
+      lng: position.coords.longitude
+    });
+    handler.map.centerOn(marker);
+  };
 });
 </script>
 
@@ -49,3 +59,5 @@ handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
 <br>
 
 <%= link_to 'New Truck', new_truck_path %>
+</br>
+<%= link_to 'Truck History', history_path %>

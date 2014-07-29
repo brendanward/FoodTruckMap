@@ -6,8 +6,6 @@ class TrucksController < ApplicationController
   def index
     @trucks = Truck.all
     
-    @test = 5
-    
     for truck in @trucks
         truck.geocode_truck
     end
@@ -25,6 +23,24 @@ class TrucksController < ApplicationController
                        "height" => 40})
     end
   end
+  
+  def history
+    @trucks = Truck.all
+    
+    @past_locations = Array.new
+    
+    for truck in @trucks
+      @past_locations = @past_locations.concat(truck.get_past_locations)
+    end
+    
+    @hash = Gmaps4rails.build_markers(@past_locations) do |past_location, marker|
+      marker.lat past_location.latitude
+      marker.lng past_location.longitude
+      marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location })
+    end
+  end
+    
+    
 
   # GET /trucks/1
   # GET /trucks/1.json
