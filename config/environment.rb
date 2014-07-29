@@ -42,6 +42,8 @@ StreetPrefixSuffix = ["north","south","east","west","n","s","e","w","n.","s.","e
 
 BrooklynNames = ["bk","brooklyn","bklyn","dumbo","dumbonyc","downtownbklyn"]
 
+QueensNames = ["queens","astoria"]
+
 NewYorkStreetNames =
 [
   "albany",

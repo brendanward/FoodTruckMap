@@ -77,6 +77,8 @@ class Truck < ActiveRecord::Base
     
     if Regexp.new("(^|\\W+)#{RegExpType(BrooklynNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
       address = "Brooklyn, NY"
+    elsif Regexp.new("(^|\\W+)#{RegExpType(QueensNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
+      address = "Queens, NY"
     else
       address = "Manhattan, NY"
     end
@@ -199,7 +201,7 @@ class Truck < ActiveRecord::Base
   end
 
   def get_past_locations
-    tweets = get_tweets(200)
+    tweets = get_tweets(100)
     past_locations = Array.new
     coordinate_hash = Hash.new
 
