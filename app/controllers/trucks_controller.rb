@@ -13,6 +13,7 @@ class TrucksController < ApplicationController
     @trucks = Truck.all
     
     @hash = Gmaps4rails.build_markers(@trucks) do |truck, marker|
+      if truck.latitude != nil and truck.longitude != nil
         marker.lat truck.latitude
         marker.lng truck.longitude
         marker.infowindow render_to_string(:partial => "/trucks/infowindow", :locals => { :truck => truck})
@@ -21,6 +22,7 @@ class TrucksController < ApplicationController
                        "url" => truck.get_profile_image,
                        "width" =>  40,
                        "height" => 40})
+      end
     end
   end
   
@@ -34,9 +36,11 @@ class TrucksController < ApplicationController
     end
     
     @hash = Gmaps4rails.build_markers(@past_locations) do |past_location, marker|
-      marker.lat past_location.latitude
-      marker.lng past_location.longitude
-      marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location })
+      if past_location.latitude != nil and past_location.longitude != nil
+        marker.lat past_location.latitude
+        marker.lng past_location.longitude
+        marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location })
+      end
     end
   end
     
@@ -50,9 +54,11 @@ class TrucksController < ApplicationController
     @past_locations = truck.get_past_locations
     
     @hash = Gmaps4rails.build_markers(@past_locations) do |past_location, marker|
-      marker.lat past_location.latitude
-      marker.lng past_location.longitude
-      marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location})
+      if past_location.latitude != nil and past_location.longitude != nil
+        marker.lat past_location.latitude
+        marker.lng past_location.longitude
+        marker.infowindow render_to_string(:partial => "/trucks/pastlocationinfowindow", :locals => { :past_location => past_location})
+      end
     end
     
   end

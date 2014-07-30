@@ -145,15 +145,25 @@ class Truck < ActiveRecord::Base
       second_geocode = Geocoder.search(second_intersection)
       
       puts first_intersection,second_intersection
-            
-      latitude = (first_geocode[0].coordinates()[0] + second_geocode[0].coordinates()[0])/2
-      longitude = (first_geocode[0].coordinates()[1] + second_geocode[0].coordinates()[1])/2
-      return [latitude,longitude]
+      
+      if first_geocode[0] != nil && second_geocode[0] != nil
+        latitude = (first_geocode[0].coordinates()[0] + second_geocode[0].coordinates()[0])/2
+        longitude = (first_geocode[0].coordinates()[1] + second_geocode[0].coordinates()[1])/2
+        return [latitude,longitude]
+      else
+        return [nil,nil]
+      end
     else
       geocode = Geocoder.search(address + ", " + city_state)
-      latitude = geocode[0].coordinates()[0]
-      longitude = geocode[0].coordinates()[1]
-      return [latitude,longitude]
+      
+      if geocode[0] != nil
+        latitude = geocode[0].coordinates()[0]
+        longitude = geocode[0].coordinates()[1]
+        return [latitude,longitude]
+      else
+        return [nil,nil]
+      end
+      
     end
   end
 
