@@ -2,3 +2,8 @@
 <h2><%= truck.address %></h2>
 <h3><%= truck.last_address_tweet %></h3>
 <h3><%= truck.last_address_tweet_time %></h3>
+
+<br>
+  <%= link_to 'Show', truck %>
+  <%= link_to 'Edit', edit_truck_path(truck) %>
+  <%= link_to 'Destroy', truck, method: :delete, data: { confirm: 'Are you sure?' } %>

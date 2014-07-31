@@ -168,7 +168,7 @@ class Truck < ActiveRecord::Base
   end
 
   def geocode_truck
-    if self.last_address_update == nil || (Time.now-self.last_address_update) > (1 * 60)
+    if self.last_address_update == nil || (Time.now-self.last_address_update) > (5 * 60)
       current_address = self.address
       tweets = self.get_tweets(200)
       
@@ -192,7 +192,9 @@ class Truck < ActiveRecord::Base
               coordinate.latitude = address_coordinate[0]
               coordinate.longitude = address_coordinate[1]
 
-              coordinate.save
+              if address_coordinate[0] != nil and address_coordinate[1] != nil
+                coordinate.save
+              end
             end
             
             self.address = full_address

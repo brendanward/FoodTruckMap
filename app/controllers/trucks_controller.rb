@@ -10,9 +10,12 @@ class TrucksController < ApplicationController
         truck.geocode_truck
     end
     
-    @trucks = Truck.all
+    current_date = DateTime.now.beginning_of_day
+    @trucks_with_current_address = Truck.where("last_address_tweet_time >= current_date")
+    @trucks_with_stale_address = Truck.where("last_address_tweet_time < current_date")
+    #@trucks = Truck.all
     
-    @hash = Gmaps4rails.build_markers(@trucks) do |truck, marker|
+    @hash = Gmaps4rails.build_markers(@trucks_with_current_address) do |truck, marker|
       if truck.latitude != nil and truck.longitude != nil
         marker.lat truck.latitude
         marker.lng truck.longitude
