@@ -3,19 +3,21 @@
 
 
 <h1>Editing coordinate</h1>
-
-<%= render 'form' %>
+<h3><%= @coordinate.address %></h3>
 
 <div style='width: 800px;'>
   <div id="map" style='width: 800px; height: 400px;'></div>
 </div>
 
+<%= render 'form' %>
+
 <script type='text/javascript'>
 
   handler = Gmaps.build('Google');
-
+  var marker = null;
+  
   handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){  
-    var marker = handler.addMarker({
+    marker = handler.addMarker({
         lat: <%=raw @coordinate.latitude %>,
         lng: <%=raw @coordinate.longitude %>
     });  
@@ -23,10 +25,14 @@
   });
   
   
-  google.maps.event.addListener(handler.getMap(), 'dblclick', function() {
-    alert(Object.keys(event));
-    //var myLatLng = event.latLng;
-    //handler.addMarker(myLatLng);
+  google.maps.event.addListener(handler.getMap(), 'dblclick', function(e) {
+    var myLatLng = e.latLng;
+    
+    handler.removeMarker(marker);
+    marker = handler.addMarker({lat: myLatLng.lat(), lng: myLatLng.lng()});
+    
+    document.getElementById("coordinate_latitude").value = myLatLng.lat();
+    document.getElementById("coordinate_longitude").value = myLatLng.lng();
   });
   
   handler.getMap().setZoom(15);

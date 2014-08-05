@@ -248,6 +248,7 @@ class Truck < ActiveRecord::Base
         
         truck_past_location.latitude = coordinate.latitude
         truck_past_location.longitude = coordinate.longitude
+        truck_past_location.coordinate_id = coordinate.id
         
         truck_past_location.tweet = tweet.text
         truck_past_location.timestamp = tweet.created_at
@@ -262,5 +263,5 @@ class Truck < ActiveRecord::Base
 end
 
 class TruckPastLocation
-  attr_accessor :latitude, :longitude, :tweet, :timestamp, :address
+  attr_accessor :latitude, :longitude, :tweet, :timestamp, :address, :coordinate_id
 end
