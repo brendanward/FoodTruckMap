@@ -115,6 +115,16 @@ class Truck < ActiveRecord::Base
       return [nil,nil]
     end
     
+    bounds = []
+    
+    if city_state = "Manhattan, NY"
+      bounds = [[40.696900,-73.933525],[40.817049,-74.032402]]
+    elsif city_state = "Brooklyn, NY"
+      bounds = [[40.556714,-73.811989],[40.743217,-74.068108]]
+    elsif city_state = "Queens, NY"
+      bounds = [[40.546279,-73.665047],[40.804056,-73.998756]]      
+    end
+    
     if address.include?("between")
     #if Truck.build_between_regexp.match(address)  
       first_street = Regexp.new(".+(?=\\W+between)", Regexp::IGNORECASE).match(address)
@@ -141,8 +151,8 @@ class Truck < ActiveRecord::Base
       
       first_intersection = first_street + " and " + first_cross_street + ", " + city_state
       second_intersection = first_street + " and " + second_cross_street + ", " + city_state
-      first_geocode = Geocoder.search(first_intersection)
-      second_geocode = Geocoder.search(second_intersection)
+      first_geocode = Geocoder.search(first_intersection, :bounds => bounds)
+      second_geocode = Geocoder.search(second_intersection, :bounds => bounds)
       
       puts first_intersection,second_intersection
       
@@ -154,7 +164,7 @@ class Truck < ActiveRecord::Base
         return [nil,nil]
       end
     else
-      geocode = Geocoder.search(address + ", " + city_state)
+      geocode = Geocoder.search(address + ", " + city_state, :bounds => bounds)
       
       if geocode[0] != nil
         latitude = geocode[0].coordinates()[0]
@@ -170,7 +180,7 @@ class Truck < ActiveRecord::Base
   def geocode_truck
     if self.last_address_update == nil || (Time.now-self.last_address_update) > (5 * 60)
       current_address = self.address
-      tweets = self.get_tweets(200)
+      tweets = self.get_tweets(100)
       
       for tweet in tweets
         address = extract_address(tweet.text)
@@ -232,6 +242,7 @@ class Truck < ActiveRecord::Base
           coordinate = Coordinate.find_by address: full_address
 
           if coordinate == nil
+            sleep(1)
             address_coordinate = geocode_address(address, city)
 
             coordinate = Coordinate.new
