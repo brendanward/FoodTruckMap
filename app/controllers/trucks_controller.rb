@@ -12,7 +12,7 @@ class TrucksController < ApplicationController
     
     current_date = DateTime.now.beginning_of_day
     @trucks_with_current_address = Truck.where("last_address_tweet_time >= current_date")
-    @trucks_with_stale_address = Truck.where("last_address_tweet_time < current_date")
+    @trucks_with_stale_address = Truck.where("last_address_tweet_time < current_date").order("last_address_tweet_time DESC")
     #@trucks = Truck.all
     
     @hash = Gmaps4rails.build_markers(@trucks_with_current_address) do |truck, marker|
