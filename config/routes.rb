@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  resources :twitter_accessors
+
   resources :trucks
   resources :coordinates
 

@@ -1,0 +1,2 @@
+module TwitterAccessorsHelper
+end

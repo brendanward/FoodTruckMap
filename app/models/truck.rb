@@ -20,7 +20,7 @@ class Truck < ActiveRecord::Base
     fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
     fullProperStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
-    includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|b/t|\\s|)\\W*)?#{intersection}"
+    includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|bw|b/t|\\s|)\\W*)?#{intersection}"
     address = "\\b[0-9]+\\W+#{fullProperStreetName}"
 
     finalRegExpString = "([^']\\b#{includeBetween}|#{address})\\b"
@@ -41,7 +41,7 @@ class Truck < ActiveRecord::Base
     allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
     fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
-    includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|b/t|\\s|)\\W*)#{intersection}"
+    includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|bw|b/t|\\s|)\\W*)#{intersection}"
 
     finalRegExpString = "([^']\\b#{includeBetween})\\b"
     Regexp.new(finalRegExpString, Regexp::IGNORECASE)
@@ -49,7 +49,7 @@ class Truck < ActiveRecord::Base
 
   def get_tweets(number_of_tweets)
     twitter_client = Truck.configure_twitter        
-    twitter_client.user_timeline(twitter_user_name, :count=>number_of_tweets)
+    twitter_client.user_timeline(twitter_user_name, :count=>number_of_tweets, :include_rts=>false, :exclude_replies=>true)
   end
 
   def get_profile_image
@@ -92,18 +92,19 @@ class Truck < ActiveRecord::Base
     end
 
     address = address.gsub(/mad\b/i," Madison ")
-    address = address.sub("&amp;"," and ")
-    address = address.sub("@"," and ")
-    address = address.sub("betw "," between ")
-    address = address.sub("btwn"," between")
-    address = address.sub("btw"," between")
+    address = address.gsub("&"," and ")
+    address = address.gsub("@"," and ")
+    address = address.gsub("betw "," between ")
+    address = address.gsub("btwn"," between ")
+    address = address.gsub(/\Wbw\W/i," between ")
+    address = address.gsub("btw"," between ")
     address = address.gsub(/bet\b/i," between ")
-    address = address.sub("b/t "," between ")
-    address = address.sub("b/w"," between ")
-    address = address.sub("b\\t "," between ")
-    address = address.sub("b\\w"," between ")
-    address = address.sub("/"," and ")
-    address = address.sub("\\"," and ")
+    address = address.gsub("b/t "," between ")
+    address = address.gsub(/b\/w/i," between ")
+    address = address.gsub("b\\t "," between ")
+    address = address.gsub("b\\w"," between ")
+    address = address.gsub("/"," and ")
+    address = address.gsub("\\"," and ")
     address = address.strip
     return address
   end
@@ -183,12 +184,13 @@ class Truck < ActiveRecord::Base
       tweets = self.get_tweets(100)
       
       for tweet in tweets
-        address = extract_address(tweet.text)
+        tweet_text = tweet.text.gsub(/&(amp;)+/i,"&")
+        address = extract_address(tweet_text)
         if address.length > 0
           if tweet.created_at != self.last_address_tweet_time
             @tweet = tweet
             address = clean_address(address)
-            city = extract_city(tweet.text)
+            city = extract_city(tweet_text)
             full_address = address + ", " + city     
             
             coordinate = Coordinate.find_by address: full_address
@@ -208,7 +210,7 @@ class Truck < ActiveRecord::Base
             end
             
             self.address = full_address
-            self.last_address_tweet = tweet.text
+            self.last_address_tweet = tweet_text
             self.last_address_tweet_time = tweet.created_at
             self.latitude = coordinate.latitude
             self.longitude = coordinate.longitude
@@ -223,15 +225,16 @@ class Truck < ActiveRecord::Base
   end
 
   def get_past_locations
-    tweets = get_tweets(100)
+    tweets = get_tweets(200)
     past_locations = Array.new
     coordinate_hash = Hash.new
 
     for tweet in tweets
-      address = extract_address(tweet.text)
+      tweet_text = tweet.text.gsub(/&(amp;)+/i,"&")
+      address = extract_address(tweet_text)
       if address.length > 0
         address = clean_address(address)
-        city = extract_city(tweet.text)
+        city = extract_city(tweet_text)
         full_address = address + ", " + city
         truck_past_location = TruckPastLocation.new
         
@@ -261,7 +264,7 @@ class Truck < ActiveRecord::Base
         truck_past_location.longitude = coordinate.longitude
         truck_past_location.coordinate_id = coordinate.id
         
-        truck_past_location.tweet = tweet.text
+        truck_past_location.tweet = tweet_text
         truck_past_location.timestamp = tweet.created_at
         truck_past_location.address = full_address
         past_locations.push(truck_past_location)
