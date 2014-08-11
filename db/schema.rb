@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140721171218) do
+ActiveRecord::Schema.define(version: 20140810180545) do
 
   create_table "coordinates", force: true do |t|
     t.string   "address"
@@ -34,6 +34,11 @@ ActiveRecord::Schema.define(version: 20140721171218) do
     t.string   "profile_image_url"
     t.datetime "profile_image_url_last_updated"
     t.datetime "last_address_tweet_time"
+  end
+
+  create_table "twitter_accessors", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
 end

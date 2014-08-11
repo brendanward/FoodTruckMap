@@ -21,9 +21,9 @@ class TwitterAccessor < ActiveRecord::Base
       all_tweets = []
       
       if max_id == 0
-        all_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>20,:include_rts=>false)
+        all_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:include_rts=>false)
       else
-        all_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>20,:include_rts=>false)
+        all_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>200,:include_rts=>false)
       end
       
       for tweet in all_tweets
@@ -39,5 +39,30 @@ class TwitterAccessor < ActiveRecord::Base
     
     return tweets
   end
-
+  
+  def self.get_all_trucks
+    client = TwitterAccessor.configure_twitter
+    trucks = client.list_members(:slug=>"foodtrucks")
+    
+    return trucks
+  end
+  
+  def self.get_tweet_for_each_truck
+    truck_tweets = Hash.new
+      
+    tweets = TwitterAccessor.get_current_day_tweets
+    
+    for tweet in tweets
+      user_id = tweet.user.id
+      if truck_tweets[user_id] == nil
+        tweet_text = tweet.text.gsub(/&(amp;)+/i,"&")
+        address = AddressExtractor.extract_address(tweet_text)
+        if address.length > 0        
+          truck_tweets[user_id] = tweet
+        end
+      end
+    end
+    
+    return truck_tweets
+  end
 end

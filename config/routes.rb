@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  root 'trucks#index'
+  #root 'trucks#index'
+  root 'twitter_accessors#index'
   
   get 'history/' => 'trucks#history'
 

@@ -1,0 +1,3 @@
+<h1><%= tweet.user.name %></h1>
+<h2><%= tweet.text.gsub(/&(amp;)+/i,"&") %></h2>
+<h3><%= tweet.created_at.to_s %></h3>
