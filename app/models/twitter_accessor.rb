@@ -11,13 +11,18 @@ class TwitterAccessor < ActiveRecord::Base
     return twitter_client
 	end
   
-  def self.get_current_day_tweets
+  def self.get_rate_limit_status
+    client = TwitterAccessor.configure_twitter
+    client.get('/1.1/application/rate_limit_status.json')[:body]
+  end
+  
+  def self.get_tweets_since_day(earliest_date)
     client = TwitterAccessor.configure_twitter
     tweets = []
-    date = DateTime.now.in_time_zone("EST").beginning_of_day
+    date = DateTime.now.in_time_zone("EST")
     max_id = 0
     
-    while date == DateTime.now.in_time_zone("EST").beginning_of_day do
+    while date >= earliest_date do
       all_tweets = []
       
       if max_id == 0
@@ -50,7 +55,7 @@ class TwitterAccessor < ActiveRecord::Base
   def self.get_tweet_for_each_truck
     truck_tweets = Hash.new
       
-    tweets = TwitterAccessor.get_current_day_tweets
+    tweets = TwitterAccessor.get_tweets_since_day(DateTime.now.in_time_zone("EST").beginning_of_day)
     
     for tweet in tweets
       user_id = tweet.user.id

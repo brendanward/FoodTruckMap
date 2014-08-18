@@ -90,12 +90,12 @@ address = "New York, NY"
     
     bounds = []
     
-    if city_state = "New York, NY"
+    if city_state == "New York, NY"
       bounds = [[40.709503,-73.971634],[40.765782,-74.021072]]
       #bounds = [[40.696900,-73.933525],[40.817049,-74.032402]]
-    elsif city_state = "Brooklyn, NY"
+    elsif city_state == "Brooklyn, NY"
       bounds = [[40.556714,-73.811989],[40.743217,-74.068108]]
-    elsif city_state = "Queens, NY"
+    elsif city_state == "Queens, NY"
       bounds = [[40.546279,-73.665047],[40.804056,-73.998756]]      
     end
     
