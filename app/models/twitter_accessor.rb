@@ -1,5 +1,5 @@
 class TwitterAccessor < ActiveRecord::Base
-  
+
   def self.configure_twitter
     twitter_client = Twitter::REST::Client.new do |config|
       config.consumer_key = Foodtruckmap.config.twitter_consumer_key
@@ -14,10 +14,10 @@ class TwitterAccessor < ActiveRecord::Base
   def self.get_current_day_tweets
     client = TwitterAccessor.configure_twitter
     tweets = []
-    date = DateTime.now.beginning_of_day
+    date = DateTime.now.in_time_zone("EST").beginning_of_day
     max_id = 0
     
-    while date == DateTime.now.beginning_of_day do
+    while date == DateTime.now.in_time_zone("EST").beginning_of_day do
       all_tweets = []
       
       if max_id == 0
@@ -27,10 +27,10 @@ class TwitterAccessor < ActiveRecord::Base
       end
       
       for tweet in all_tweets
-        date = tweet.created_at.beginning_of_day
+        date = tweet.created_at.in_time_zone("EST").beginning_of_day
         max_id = tweet.id
-        if date == DateTime.now.beginning_of_day
-          tweets.push(tweet)
+        if date == DateTime.now.in_time_zone("EST").beginning_of_day
+          tweets << tweet
         else
           break
         end

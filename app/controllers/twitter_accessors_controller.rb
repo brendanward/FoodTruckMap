@@ -9,14 +9,15 @@ class TwitterAccessorsController < ApplicationController
     
     for truck in TwitterAccessor.get_all_trucks
       if truck_tweets[truck.id] == nil
-        @trucks_without_location.push(truck)
+        @trucks_without_location << truck
       end
     end
     
     @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
-      address = AddressExtractor.extract_address(tweet.text)
-      city = AddressExtractor.extract_city(tweet.text)
+      address = AddressExtractor.extract_address(tweet.text.gsub(/&(amp;)+/i,"&"))
+      city = AddressExtractor.extract_city(tweet.text.gsub(/&(amp;)+/i,"&"))
       coordinates = AddressExtractor.geocode_address(address,city)
+      sleep(1.0/4.0) #/
       
       if coordinates[0] != nil and coordinates[1] != nil
         marker.lat coordinates[0]
@@ -28,6 +29,8 @@ class TwitterAccessorsController < ApplicationController
                        "height" => 40})
       end
     end
+    
+    @all_tweets = TwitterAccessor.get_current_day_tweets
   end
 
   # GET /twitter_accessors/1

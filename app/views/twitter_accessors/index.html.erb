@@ -37,5 +37,20 @@
   </tbody>
 </table>
 
+<h2>All Tweets Today</h2>
+
+<table>
+  <tbody>
+    <% @all_tweets.each do |tweet| %>
+      <tr>
+        <td><%= image_tag(tweet.user.profile_image_url(size = :normal).to_s) %></td>
+        <td><%= tweet.user.name %></td>
+        <td><%= tweet.text %></td>
+        <td><%= tweet.created_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
 <br>
 

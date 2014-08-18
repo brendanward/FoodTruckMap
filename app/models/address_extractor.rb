@@ -1,19 +1,22 @@
 class AddressExtractor
-    def self.build_regexp
-    cardinalStreetNames = "[0-9]+#{RegExpType(CardinalSuffix)}?"
+  include AddressHelper
+  
+  def self.build_regexp
+    cardinalStreetNames = "(?<!\$)[0-9]+#{RegExpType(CardinalSuffix)}?"
     allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
     fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
     fullProperStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
     includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|bw|b/t|\\s|)\\W*)?#{intersection}"
-    address = "\\b[0-9]+\\W+#{fullProperStreetName}"
+    address = "\\b(?<!\$)[0-9]+\\W+#{fullProperStreetName}"
 
-    finalRegExpString = "([^']\\b#{includeBetween}|#{address})\\b"
+    #finalRegExpString = "([^']\\b#{includeBetween}|#{address})\\b"
+    finalRegExpString = "(\\b#{includeBetween}|#{address})\\b"
     Regexp.new(finalRegExpString, Regexp::IGNORECASE)
   end
 
   def self.build_between_regex
-    cardinalStreetNames = "[0-9]+#{RegExpType(CardinalSuffix)}?"
+    cardinalStreetNames = "(?<!\$)[0-9]+#{RegExpType(CardinalSuffix)}?"
     allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
     fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
@@ -23,12 +26,43 @@ class AddressExtractor
     Regexp.new(finalRegExpString, Regexp::IGNORECASE)
   end
 
+  def self.clean_address(address)
+    if address == nil
+      return ""
+    end
+
+    address = address.gsub(/mad\b/i," Madison ")
+    address = address.gsub(/lex\b/i," Lexington ")
+    address = address.gsub("&"," and ")
+    address = address.gsub("@"," and ")
+    address = address.gsub("betw "," between ")
+    address = address.gsub("btwn"," between ")
+    address = address.gsub(/\Wbw\W/i," between ")
+    address = address.gsub("btw"," between ")
+    address = address.gsub(/bet\b/i," between ")
+    address = address.gsub("b/t "," between ")
+    address = address.gsub(/b\/w/i," between ")
+    address = address.gsub("b\\t "," between ")
+    address = address.gsub("b\\w"," between ")
+    
+    address = address.gsub("/"," and ")
+    address = address.gsub("\\"," and ")
+    
+    address = address.strip
+    return address
+  end
+
   def self.extract_address(tweet_text)
-    match = Truck.build_regexp.match(tweet_text)
+    match = AddressExtractor.build_regexp.match(tweet_text)
     if match == nil
       return ""
     else
-      return match[0]
+      address = match[0]
+      if Regexp.new("[0-9]/[0-9]", Regexp::IGNORECASE).match(address)
+        return ""
+      else
+        return AddressExtractor.clean_address(address)
+      end
     end
   end
 
@@ -41,37 +75,14 @@ class AddressExtractor
     elsif Regexp.new("(^|\\W+)#{RegExpType(QueensNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
       address = "Queens, NY"
     else
-      address = "Manhattan, NY"
+address = "New York, NY"
     end
 
-    return address
-  end
-
-  def self.clean_address(address)
-    if address == nil
-      return ""
-    end
-
-    address = address.gsub(/mad\b/i," Madison ")
-    address = address.gsub("&"," and ")
-    address = address.gsub("@"," and ")
-    address = address.gsub("betw "," between ")
-    address = address.gsub("btwn"," between ")
-    address = address.gsub(/\Wbw\W/i," between ")
-    address = address.gsub("btw"," between ")
-    address = address.gsub(/bet\b/i," between ")
-    address = address.gsub("b/t "," between ")
-    address = address.gsub(/b\/w/i," between ")
-    address = address.gsub("b\\t "," between ")
-    address = address.gsub("b\\w"," between ")
-    address = address.gsub("/"," and ")
-    address = address.gsub("\\"," and ")
-    address = address.strip
     return address
   end
 
   def self.geocode_address(address, city_state)
-    puts 'GEOCODING: ', address, city_state
+    puts "GEOCODING:  #{address}, #{city_state}"
     
     if address.length == 0
       return [nil,nil]
@@ -79,8 +90,9 @@ class AddressExtractor
     
     bounds = []
     
-    if city_state = "Manhattan, NY"
-      bounds = [[40.696900,-73.933525],[40.817049,-74.032402]]
+    if city_state = "New York, NY"
+      bounds = [[40.709503,-73.971634],[40.765782,-74.021072]]
+      #bounds = [[40.696900,-73.933525],[40.817049,-74.032402]]
     elsif city_state = "Brooklyn, NY"
       bounds = [[40.556714,-73.811989],[40.743217,-74.068108]]
     elsif city_state = "Queens, NY"
@@ -92,6 +104,8 @@ class AddressExtractor
       first_street = Regexp.new(".+(?=\\W+between)", Regexp::IGNORECASE).match(address)
       first_cross_street = Regexp.new("(?<=between\\s).+(?=\\sand)", Regexp::IGNORECASE).match(address)
       second_cross_street = Regexp.new("(?<=\\Wand\\W).+", Regexp::IGNORECASE).match(address)
+      
+      puts "Between Geocoding: " << address,first_street,first_cross_street,second_cross_street
       
       if (first_street == nil)
         first_street = ""

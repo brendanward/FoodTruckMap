@@ -1,3 +1,4 @@
 <h1><%= tweet.user.name %></h1>
 <h2><%= tweet.text.gsub(/&(amp;)+/i,"&") %></h2>
-<h3><%= tweet.created_at.to_s %></h3>
+<h3><%= tweet.created_at.to_s.in_time_zone("EST") %></h3>
+<h3><%= AddressExtractor.extract_address(tweet.text.gsub(/&(amp;)+/i,"&")) << " " << AddressExtractor.extract_city(tweet.text) %></h3>
