@@ -1,0 +1,4 @@
+<h1><%= @all_trucks[tweet.twitter_user_id].name %></h1>
+<h2><%= tweet.text %></h2>
+<h3><%= tweet.tweet_created_at.to_s.in_time_zone("EST") %></h3>
+<h3><%= AddressExtractor.extract_address(tweet.text) << ", " << AddressExtractor.extract_city(tweet.text) %></h3>

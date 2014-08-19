@@ -1,0 +1,29 @@
+<%= form_for(@twitter_truck) do |f| %>
+  <% if @twitter_truck.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@twitter_truck.errors.count, "error") %> prohibited this twitter_truck from being saved:</h2>
+
+      <ul>
+      <% @twitter_truck.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :twitter_use_id %><br>
+    <%= f.number_field :twitter_use_id %>
+  </div>
+  <div class="field">
+    <%= f.label :user_name %><br>
+    <%= f.text_field :user_name %>
+  </div>
+  <div class="field">
+    <%= f.label :image_path %><br>
+    <%= f.text_field :image_path %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

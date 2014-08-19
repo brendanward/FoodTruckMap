@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140818192044) do
+ActiveRecord::Schema.define(version: 20140819182950) do
 
   create_table "coordinates", force: true do |t|
     t.string   "address"
@@ -48,6 +48,15 @@ ActiveRecord::Schema.define(version: 20140818192044) do
   create_table "twitter_accessors", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "twitter_trucks", force: true do |t|
+    t.integer  "twitter_user_id"
+    t.string   "name"
+    t.string   "image_url"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "twitter_screen_name"
   end
 
 end
