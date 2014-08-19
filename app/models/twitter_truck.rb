@@ -4,7 +4,7 @@ class TwitterTruck < ActiveRecord::Base
   def self.update_trucks
     min_updated_at = TwitterTruck.minimum(:updated_at)
     
-    if min_updated_at == nil || (Time.now - min_updated_at) > 1 #(60 * 60 * 12)      
+    if min_updated_at == nil || (Time.now - min_updated_at) > (60 * 60 * 12)      
       #client = configure_twitter
       #trucks = client.list_members(:slug=>"foodtrucks")
       trucks = get_list_members

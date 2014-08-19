@@ -32,9 +32,7 @@ class AddressExtractor
   end
 
   def self.clean_address(address)
-    if address == nil
-      return ""
-    end
+    return "" if address == nil
 
     address = address.gsub(/mad\b/i," Madison ")
     address = address.gsub(/lex\b/i," Lexington ")
@@ -59,17 +57,15 @@ class AddressExtractor
 
   def self.extract_address(tweet_text)
     match = AddressExtractor.build_regexp.match(tweet_text)
-    if match == nil
-      return ""
-    else
-      address = match[0]
-      if Regexp.new("[0-9]/[0-9]", Regexp::IGNORECASE).match(address)
-        return ""
-      else
-        return AddressExtractor.clean_address(address)
-      end
-    end
+    return "" if match == nil
+
+    address = match[0]
+    
+    return "" if Regexp.new("[0-9]/[0-9]", Regexp::IGNORECASE).match(address)
+    return AddressExtractor.clean_address(address)
+
   end
+
 
   def self.extract_city(tweet_text)
     tweet_text = tweet_text.downcase
@@ -89,17 +85,16 @@ address = "New York, NY"
   def self.geocode_address(address, city_state)
     puts "GEOCODING:  #{address}, #{city_state}"
     
-    if address.length == 0
-      return [nil,nil]
-    end
+    return [nil,nil] if address.length == 0
     
     bounds = []
     
-    if city_state == "New York, NY"
+    case city_state
+    when "New York, NY"
       bounds = [[40.709503,-73.971634],[40.765782,-74.021072]]
-    elsif city_state == "Brooklyn, NY"
+    when "Brooklyn, NY"
       bounds = [[40.556714,-73.811989],[40.743217,-74.068108]]
-    elsif city_state == "Queens, NY"
+    when "Queens, NY"
       bounds = [[40.546279,-73.665047],[40.804056,-73.998756]]      
     end
     

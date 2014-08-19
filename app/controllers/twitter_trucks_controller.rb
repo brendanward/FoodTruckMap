@@ -100,6 +100,6 @@ class TwitterTrucksController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def twitter_truck_params
-      params.require(:twitter_truck).permit(:twitter_use_id, :user_name, :image_path)
+      params.require(:twitter_truck).permit(:twitter_user_id, :name, :image_url)
     end
 end

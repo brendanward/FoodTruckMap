@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  get 'tweets/show'
+
   resources :twitter_trucks
   resources :tweets
 
