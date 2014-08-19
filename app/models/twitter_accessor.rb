@@ -16,35 +16,6 @@ class TwitterAccessor < ActiveRecord::Base
     client.get('/1.1/application/rate_limit_status.json')[:body]
   end
   
-  def self.get_tweets_since_day(earliest_date)
-    client = TwitterAccessor.configure_twitter
-    tweets = []
-    date = DateTime.now.in_time_zone("EST")
-    max_id = 0
-    
-    while date >= earliest_date do
-      all_tweets = []
-      
-      if max_id == 0
-        all_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:include_rts=>false)
-      else
-        all_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>200,:include_rts=>false)
-      end
-      
-      for tweet in all_tweets
-        date = tweet.created_at.in_time_zone("EST").beginning_of_day
-        max_id = tweet.id
-        if date == DateTime.now.in_time_zone("EST").beginning_of_day
-          tweets << tweet
-        else
-          break
-        end
-      end
-    end
-    
-    return tweets
-  end
-  
   def self.get_tweets_since(since_value)
     client = TwitterAccessor.configure_twitter
     tweets = []
@@ -98,16 +69,16 @@ class TwitterAccessor < ActiveRecord::Base
   
   def self.get_tweet_for_each_truck
     truck_tweets = Hash.new
-      
-    tweets = TwitterAccessor.get_tweets_since_day(DateTime.now.in_time_zone("EST").beginning_of_day)
+    current_date = DateTime.now.in_time_zone("EST").beginning_of_day
     
-    for tweet in tweets
-      user_id = tweet.user.id
+    tweets = Tweet.where("tweet_created_at >= current_date")
+    
+    tweets.each do |t|
+      user_id = t.twitter_user_id
       if truck_tweets[user_id] == nil
-        tweet_text = tweet.text.gsub(/&(amp;)+/i,"&")
-        address = AddressExtractor.extract_address(tweet_text)
+        address = AddressExtractor.extract_address(t.text)
         if address.length > 0        
-          truck_tweets[user_id] = tweet
+          truck_tweets[user_id] = t
         end
       end
     end
@@ -131,7 +102,7 @@ class TwitterAccessor < ActiveRecord::Base
       tweet = Tweet.new
       tweet.twitter_id = t.id
       tweet.twitter_user_id = t.user.id
-      tweet.text = t.text
+      tweet.text = t.text.gsub(/&(amp;)+/i,"&")
       tweet.tweet_created_at = t.created_at
       
       tweet.save

@@ -4,33 +4,34 @@ class TwitterAccessorsController < ApplicationController
   # GET /twitter_accessors
   # GET /twitter_accessors.json
   def index 
+    TwitterAccessor.update_tweets
     truck_tweets = TwitterAccessor.get_tweet_for_each_truck
     @trucks_without_location = []
+    @all_trucks = Hash.new
     
-    for truck in TwitterAccessor.get_all_trucks
+    TwitterAccessor.get_all_trucks.each do |truck|
+      @all_trucks[truck.id] = truck
       if truck_tweets[truck.id] == nil
         @trucks_without_location << truck
       end
     end
     
     @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
-      address = AddressExtractor.extract_address(tweet.text.gsub(/&(amp;)+/i,"&"))
-      city = AddressExtractor.extract_city(tweet.text.gsub(/&(amp;)+/i,"&"))
+      address = AddressExtractor.extract_address(tweet.text)
+      city = AddressExtractor.extract_city(tweet.text)
       coordinates = AddressExtractor.geocode_address(address,city)
-      sleep(1.0/4.0) #/
+      sleep(1.0/8.0) #/
       
       if coordinates[0] != nil and coordinates[1] != nil
         marker.lat coordinates[0]
         marker.lng coordinates[1]
         marker.infowindow render_to_string(:partial => "/twitter_accessors/infowindow", :locals => { :tweet => tweet})
         marker.picture({
-                       "url" => tweet.user.profile_image_url(size = :normal).to_s,
+          "url" => @all_trucks[tweet.twitter_user_id].profile_image_url(size = :normal).to_s,
                        "width" =>  40,
                        "height" => 40})
       end
     end
-    
-    @all_tweets = TwitterAccessor.get_current_day_tweets
   end
 
   # GET /twitter_accessors/1
