@@ -10,33 +10,21 @@ class TwitterTrucksController < ApplicationController
     truck_tweets = Hash.new
     current_date = DateTime.now.in_time_zone("EST").beginning_of_day
     
-    tweets = Tweet.where("tweet_created_at >= '#{current_date.to_s}'")
+    tweets = Tweet.where("tweet_created_at >= '#{current_date.to_s}'").order(tweet_created_at: :desc)
     
-    tweets.each do |t|
-      user_id = t.twitter_user_id
-      if truck_tweets[user_id] == nil
-        address = AddressExtractor.extract_address(t.text)
-        if address.length > 0        
-          truck_tweets[user_id] = t
-        end
-      end
-    end    
+    tweets.each { |tweet| truck_tweets[tweet.twitter_user_id] = tweet if !truck_tweets[tweet.twitter_user_id] && tweet.contains_address? }
     
     @trucks_without_location = []
     @all_trucks = Hash.new
     
     TwitterTruck.all.each do |truck|
       @all_trucks[truck.twitter_user_id] = truck
-      if truck_tweets[truck.twitter_user_id] == nil
-        @trucks_without_location << truck
-      end
+      @trucks_without_location << truck if !truck_tweets[truck.twitter_user_id]
     end
     
     @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
-      address = AddressExtractor.extract_address(tweet.text)
-      city = AddressExtractor.extract_city(tweet.text)
-      coordinates = AddressExtractor.geocode_address(address,city)
-      sleep(1.0/8.0) #/
+      coordinates = tweet.get_coordinates
+      sleep(1.0/16.0) #/
       
       if coordinates[0] != nil and coordinates[1] != nil
         marker.lat coordinates[0]

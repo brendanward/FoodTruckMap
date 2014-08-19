@@ -1,6 +1,6 @@
-module TwitterHelper
+module TwitterAccessor
   def self.included base
-    #base.send :include, InstanceMethods
+    base.send :include, InstanceMethods
     base.extend ClassMethods
   end
   
@@ -14,35 +14,37 @@ module TwitterHelper
 
     return twitter_client
   end
+
+  module ClassMethods 
   
-  module ClassMethods    
     def get_list_members
-      client = TwitterHelper.configure_twitter
+      client = TwitterAccessor.configure_twitter
       return client.list_members(:slug=>"foodtrucks")
     end
     
-    def get_tweets_since(since_value)
-      client = TwitterHelper.configure_twitter
+    def get_list_tweets_since(since_value, max_id = 0)
+      client = TwitterAccessor.configure_twitter
       tweets = []
-      puts "get_tweets_since called with #{since_value}"
+      puts "get_tweets_since called with #{since_value} and #{max_id}"
 
       if (since_value.is_a?(Date) || since_value.is_a?(Time))
         date = DateTime.now.in_time_zone("EST")
-        max_id = 0
 
         while date >= since_value do
-          all_tweets = []
+          returned_tweets = []
 
           if max_id == 0
-            all_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:include_rts=>false)
+            returned_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:include_rts=>false)
           else
-            all_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>200,:include_rts=>false)
+            returned_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>200,:include_rts=>false)
           end
 
-          for tweet in all_tweets
-            date = tweet.created_at.in_time_zone("EST").beginning_of_day
+          break if returned_tweets.count == 0 
+            
+          returned_tweets.each do |tweet|
+            date = tweet.created_at
             max_id = tweet.id
-            if date == DateTime.now.in_time_zone("EST").beginning_of_day
+            if date >= since_value
               tweets << tweet
             else
               break
@@ -56,7 +58,9 @@ module TwitterHelper
         while tweets_returned > 0 do
           max_id = tweets.last.id
           returned_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:max_id=>max_id-1,:since_id=>since_value,:include_rts=>false)
-
+          
+          break if returned_tweets.count == 0 
+          
           tweets += returned_tweets
           tweets_returned = returned_tweets.count
         end
@@ -66,9 +70,15 @@ module TwitterHelper
     end
     
     def get_rate_limit_status
-      client = TwitterHelper.configure_twitter
+      client = TwitterAccessor.configure_twitter
       client.get('/1.1/application/rate_limit_status.json')[:body]
     end
-    
   end    
+  
+  module InstanceMethods
+    def get_timeline(twitter_user_name)
+      client = TwitterAccessor.configure_twitter
+      client.user_timeline(twitter_user_name, :count=>200, :include_rts=>false, :exclude_replies=>true)
+    end
+  end
 end

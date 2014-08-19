@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   resources :twitter_trucks
+  resources :tweets
 
   resources :trucks
   resources :coordinates
@@ -10,7 +11,6 @@ Rails.application.routes.draw do
 
   # You can have the root of your site routed with "root"
   #root 'trucks#index'
-  #root 'twitter_accessors#index'
   root 'twitter_trucks#index'
   
   get 'history/' => 'trucks#history'

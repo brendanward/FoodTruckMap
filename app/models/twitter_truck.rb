@@ -1,5 +1,5 @@
 class TwitterTruck < ActiveRecord::Base
-  include TwitterHelper
+  include TwitterAccessor
   
   def self.update_trucks
     min_updated_at = TwitterTruck.minimum(:updated_at)
@@ -28,4 +28,5 @@ class TwitterTruck < ActiveRecord::Base
 
     return trucks
   end
+
 end

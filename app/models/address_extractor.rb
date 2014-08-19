@@ -1,11 +1,16 @@
 class AddressExtractor
-  include AddressHelper
+  include AddressTerms
+  include NewYorkAddressTerms
   
+  def self.regExpType(x)
+    "(#{x.join("|")})"
+  end
+
   def self.build_regexp
-    cardinalStreetNames = "(?<!\$)[0-9]+#{RegExpType(CardinalSuffix)}?"
-    allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
-    fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
-    fullProperStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}"
+    cardinalStreetNames = "(?<!\$)[0-9]+#{AddressExtractor.regExpType(CardinalSuffix)}?"
+    allStreetNames = "(#{cardinalStreetNames}|#{AddressExtractor.regExpType(NewYorkStreetNames)})"
+    fullStreetName = "(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\W)?\\s*#{AddressExtractor.regExpType(StreetTypes)}?"
+    fullProperStreetName = "(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\W)?\\s*#{AddressExtractor.regExpType(StreetTypes)}"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
     includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|bw|b/t|\\s|)\\W*)?#{intersection}"
     address = "\\b(?<!\$)[0-9]+\\W+#{fullProperStreetName}"
@@ -16,9 +21,9 @@ class AddressExtractor
   end
 
   def self.build_between_regex
-    cardinalStreetNames = "(?<!\$)[0-9]+#{RegExpType(CardinalSuffix)}?"
-    allStreetNames = "(#{cardinalStreetNames}|#{RegExpType(NewYorkStreetNames)})"
-    fullStreetName = "(#{RegExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{RegExpType(StreetPrefixSuffix)}\\W)?\\s*#{RegExpType(StreetTypes)}?"
+    cardinalStreetNames = "(?<!\$)[0-9]+#{AddressExtractor.regExpType(CardinalSuffix)}?"
+    allStreetNames = "(#{cardinalStreetNames}|#{AddressExtractor.regExpType(NewYorkStreetNames)})"
+    fullStreetName = "(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\s*)?#{allStreetNames}\\s*(#{AddressExtractor.regExpType(StreetPrefixSuffix)}\\W)?\\s*#{AddressExtractor.regExpType(StreetTypes)}?"
     intersection = "#{fullStreetName}\\W*((and|n|\\/|\\|\\+|&|&amp;|@)\\W*)+#{fullStreetName}"
     includeBetween = "(#{fullStreetName}\\W*(b.*w.*|bet|bw|b/t|\\s|)\\W*)#{intersection}"
 
@@ -70,9 +75,9 @@ class AddressExtractor
     tweet_text = tweet_text.downcase
     address = ""
     
-    if Regexp.new("(^|\\W+)#{RegExpType(BrooklynNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
+    if Regexp.new("(^|\\W+)#{AddressExtractor.regExpType(BrooklynNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
       address = "Brooklyn, NY"
-    elsif Regexp.new("(^|\\W+)#{RegExpType(QueensNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
+    elsif Regexp.new("(^|\\W+)#{AddressExtractor.regExpType(QueensNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
       address = "Queens, NY"
     else
 address = "New York, NY"
@@ -92,7 +97,6 @@ address = "New York, NY"
     
     if city_state == "New York, NY"
       bounds = [[40.709503,-73.971634],[40.765782,-74.021072]]
-      #bounds = [[40.696900,-73.933525],[40.817049,-74.032402]]
     elsif city_state == "Brooklyn, NY"
       bounds = [[40.556714,-73.811989],[40.743217,-74.068108]]
     elsif city_state == "Queens, NY"
@@ -133,8 +137,8 @@ address = "New York, NY"
       puts first_intersection,second_intersection
       
       if first_geocode[0] != nil && second_geocode[0] != nil
-        latitude = (first_geocode[0].coordinates()[0] + second_geocode[0].coordinates()[0])/2
-        longitude = (first_geocode[0].coordinates()[1] + second_geocode[0].coordinates()[1])/2
+        latitude = (first_geocode[0].coordinates()[0] + second_geocode[0].coordinates()[0])/2 #/
+        longitude = (first_geocode[0].coordinates()[1] + second_geocode[0].coordinates()[1])/2 #/
         return [latitude,longitude]
       else
         return [nil,nil]

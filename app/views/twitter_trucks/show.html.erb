@@ -1,19 +1,30 @@
 <p id="notice"><%= notice %></p>
 
 <p>
-  <strong>Twitter use:</strong>
-  <%= @twitter_truck.twitter_use_id %>
+  <strong>Twitter user:</strong>
+  <%= @twitter_truck.twitter_user_id %>
 </p>
 
 <p>
   <strong>User name:</strong>
-  <%= @twitter_truck.user_name %>
+  <%= @twitter_truck.name %>
 </p>
 
 <p>
   <strong>Image path:</strong>
-  <%= @twitter_truck.image_path %>
+  <%= @twitter_truck.image_url %>
 </p>
+  
+<table>
+  <tbody>
+    <% @twitter_truck.get_timeline(@twitter_truck.twitter_screen_name).each do |tweet| %>
+      <tr>
+        <td><%= tweet.text %></td>
+        <td><%= tweet.created_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
 <%= link_to 'Edit', edit_twitter_truck_path(@twitter_truck) %> |
 <%= link_to 'Back', twitter_trucks_path %>
