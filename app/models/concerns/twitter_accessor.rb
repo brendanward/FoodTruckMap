@@ -76,9 +76,40 @@ module TwitterAccessor
   end    
   
   module InstanceMethods
-    def get_timeline(twitter_user_name)
+    def get_timeline_for_user(twitter_id)
       client = TwitterAccessor.configure_twitter
-      client.user_timeline(twitter_user_name, :count=>200, :include_rts=>false, :exclude_replies=>true)
+      client.user_timeline(twitter_id, :count=>200, :include_rts=>false, :exclude_replies=>true)
+    end
+    
+    def get_timeline_for_user_since(twitter_id,since_date)
+      client = TwitterAccessor.configure_twitter
+      max_id = Tweet.where("twitter_user_id = '#{twitter_id.to_s}'").order(:twitter_id).first.twitter_id   
+      tweets = []
+      date = DateTime.now.in_time_zone("EST")
+
+      while date >= since_date do
+        returned_tweets = []
+
+        if max_id == nil
+          returned_tweets = client.user_timeline(twitter_id, :count=>200, :include_rts=>false, :exclude_replies=>true)
+        else
+          returned_tweets = client.user_timeline(twitter_id,:max_id=>max_id-1, :count=>200, :include_rts=>false, :exclude_replies=>true)
+        end
+
+        break if returned_tweets.count == 0 
+            
+        returned_tweets.each do |tweet|
+          date = tweet.created_at
+          max_id = tweet.id
+          if date >= since_date
+            tweets << tweet
+          else
+            break
+          end
+        end
+      end
+      
+      return tweets
     end
   end
 end

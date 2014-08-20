@@ -2,6 +2,8 @@ class Tweet < ActiveRecord::Base
   before_save :clean_text
   include TwitterAccessor
   
+  @@last_updated = nil
+  
   private
   def clean_text
     self.text = self.text.gsub(/&(amp;)+/i,"&")
@@ -14,8 +16,10 @@ class Tweet < ActiveRecord::Base
     
     tweets = []
     
+    puts "Tweet last updated at #{@@last_updated.to_s}"
     if max_id
-      tweets = get_list_tweets_since(max_id) if (Time.now - max_created_at) > (5 * 60)
+      tweets = get_list_tweets_since(max_id) if @@last_updated == nil || (Time.now - @@last_updated) > (5 * 60)
+      @@last_updated = Time.now
     else
       tweets = get_list_tweets_since(DateTime.now.in_time_zone("EST").beginning_of_day)
     end

@@ -83,7 +83,7 @@ address = "New York, NY"
   end
 
   def self.geocode_address(address, city_state)
-    puts "GEOCODING:  #{address}, #{city_state}"
+    #puts "GEOCODING:  #{address}, #{city_state}"
     
     return [nil,nil] if address.length == 0
     
@@ -104,7 +104,7 @@ address = "New York, NY"
       first_cross_street = Regexp.new("(?<=between\\s).+(?=\\sand)", Regexp::IGNORECASE).match(address)
       second_cross_street = Regexp.new("(?<=\\Wand\\W).+", Regexp::IGNORECASE).match(address)
       
-      puts "Between Geocoding: " << address,first_street,first_cross_street,second_cross_street
+      #puts "Between Geocoding: " << address,first_street,first_cross_street,second_cross_street
       
       if (first_street == nil)
         first_street = ""
@@ -129,7 +129,7 @@ address = "New York, NY"
       first_geocode = Geocoder.search(first_intersection, :bounds => bounds)
       second_geocode = Geocoder.search(second_intersection, :bounds => bounds)
       
-      puts first_intersection,second_intersection
+      #puts first_intersection,second_intersection
       
       if first_geocode[0] != nil && second_geocode[0] != nil
         latitude = (first_geocode[0].coordinates()[0] + second_geocode[0].coordinates()[0])/2 #/

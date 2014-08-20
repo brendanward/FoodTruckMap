@@ -24,7 +24,7 @@ class TwitterTrucksController < ApplicationController
     
     @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
       coordinates = tweet.get_coordinates
-      sleep(1.0/16.0) #/
+      sleep(1.0/8.0) #/
       
       if coordinates[0] != nil and coordinates[1] != nil
         marker.lat coordinates[0]

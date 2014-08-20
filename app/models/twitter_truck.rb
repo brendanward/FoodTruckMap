@@ -1,12 +1,12 @@
 class TwitterTruck < ActiveRecord::Base
   include TwitterAccessor
   
+  @@last_updated = nil
+  
   def self.update_trucks
-    min_updated_at = TwitterTruck.minimum(:updated_at)
-    
-    if min_updated_at == nil || (Time.now - min_updated_at) > (60 * 60 * 12)      
-      #client = configure_twitter
-      #trucks = client.list_members(:slug=>"foodtrucks")
+    if @@last_updated == nil || (Time.now - @@last_updated) > (60 * 60)
+      @@last_updated = Time.now      
+
       trucks = get_list_members
 
       trucks.each do |truck|
@@ -27,6 +27,10 @@ class TwitterTruck < ActiveRecord::Base
     end
 
     return trucks
+  end
+  
+  def get_timeline
+    get_timeline_for_user_since(self.twitter_user_id,DateTime.now - 15)
   end
 
 end
