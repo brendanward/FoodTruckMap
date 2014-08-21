@@ -24,6 +24,7 @@ module TwitterAccessor
     
     def get_list_tweets_since(since_value, max_id = 0)
       client = TwitterAccessor.configure_twitter
+      twitter_params = {:slug=>"foodtrucks", :count=>200, :include_rts=>false}
       tweets = []
       puts "get_tweets_since called with #{since_value} and #{max_id}"
 
@@ -32,32 +33,26 @@ module TwitterAccessor
 
         while date >= since_value do
           returned_tweets = []
+          twitter_params[:max_id] = max_id - 1 unless max_id.nil?
 
-          if max_id == 0
-            returned_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:include_rts=>false)
-          else
-            returned_tweets = client.list_timeline(:slug=>"foodtrucks",:max_id=>max_id-1,:count=>200,:include_rts=>false)
-          end
+          returned_tweets = client.list_timeline(twitter_params)
 
           break if returned_tweets.count == 0 
             
           returned_tweets.each do |tweet|
             date = tweet.created_at
             max_id = tweet.id
-            if date >= since_value
-              tweets << tweet
-            else
-              break
-            end
+            date >= since_value ? tweets << tweet : break
           end
         end
-      elsif since_value.is_a?(Integer)      
-        tweets += client.list_timeline(:slug=>"foodtrucks",:count=>200,:since_id=>since_value,:include_rts=>false)    
+      elsif since_value.is_a?(Integer)  
+        twitter_params[:since_id] = since_value
+        tweets += client.list_timeline(twitter_params)    
         tweets_returned = tweets.count
 
         while tweets_returned > 0 do
-          max_id = tweets.last.id
-          returned_tweets = client.list_timeline(:slug=>"foodtrucks",:count=>200,:max_id=>max_id-1,:since_id=>since_value,:include_rts=>false)
+          twitter_params[:max_id] = tweets.last.id - 1
+          returned_tweets = client.list_timeline(twitter_params)
           
           break if returned_tweets.count == 0 
           
@@ -83,29 +78,25 @@ module TwitterAccessor
     
     def get_timeline_for_user_since(twitter_id,since_date)
       client = TwitterAccessor.configure_twitter
-      max_id = Tweet.where("twitter_user_id = '#{twitter_id.to_s}'").order(:twitter_id).first.twitter_id   
+      twitter_params = {:user_id=>twitter_id, :count=>200, :include_rts=>false, :exclude_replied=>true}
+      first_tweet = Tweet.where("twitter_user_id = '#{twitter_id.to_s}'").order(:twitter_id).first
+      first_tweet ? max_id = first_tweet.twitter_id : max_id = nil
+      
       tweets = []
       date = DateTime.now.in_time_zone("EST")
 
       while date >= since_date do
         returned_tweets = []
 
-        if max_id == nil
-          returned_tweets = client.user_timeline(twitter_id, :count=>200, :include_rts=>false, :exclude_replies=>true)
-        else
-          returned_tweets = client.user_timeline(twitter_id,:max_id=>max_id-1, :count=>200, :include_rts=>false, :exclude_replies=>true)
-        end
+        twitter_params[:max_id] = max_id - 1 unless max_id.nil?
+        returned_tweets = client.user_timeline(twitter_params)
 
         break if returned_tweets.count == 0 
             
         returned_tweets.each do |tweet|
           date = tweet.created_at
           max_id = tweet.id
-          if date >= since_date
-            tweets << tweet
-          else
-            break
-          end
+          date >= since_date ? tweets << tweet : break
         end
       end
       

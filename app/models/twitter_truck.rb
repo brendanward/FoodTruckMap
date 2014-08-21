@@ -4,7 +4,7 @@ class TwitterTruck < ActiveRecord::Base
   @@last_updated = nil
   
   def self.update_trucks
-    if @@last_updated == nil || (Time.now - @@last_updated) > (60 * 60)
+    if @@last_updated.nil? || (Time.now - @@last_updated) > (60 * 60)
       @@last_updated = Time.now      
 
       trucks = get_list_members
@@ -14,7 +14,7 @@ class TwitterTruck < ActiveRecord::Base
         twitter_trucks = TwitterTruck.where("twitter_user_id = #{truck_id}")
         twitter_truck = twitter_trucks[0]
         
-        if twitter_truck == nil
+        if twitter_truck.nil?
           twitter_truck = TwitterTruck.new
           twitter_truck.twitter_user_id = truck.id
         end
@@ -29,8 +29,8 @@ class TwitterTruck < ActiveRecord::Base
     return trucks
   end
   
-  def get_timeline
-    get_timeline_for_user_since(self.twitter_user_id,DateTime.now - 15)
+  def get_timeline_since(date)
+    get_timeline_for_user_since(self.twitter_user_id,date)
   end
 
 end

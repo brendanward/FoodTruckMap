@@ -31,7 +31,7 @@ class TwitterTrucksController < ApplicationController
         marker.lng coordinates[1]
         marker.infowindow render_to_string(:partial => "/twitter_trucks/infowindow", :locals => { :tweet => tweet})
         marker.picture({
-          "url" => @all_trucks[tweet.twitter_user_id].image_url,
+                       "url" => @all_trucks[tweet.twitter_user_id].image_url,
                        "width" =>  40,
                        "height" => 40})
       end
@@ -41,6 +41,8 @@ class TwitterTrucksController < ApplicationController
   # GET /twitter_trucks/1
   # GET /twitter_trucks/1.json
   def show
+    @truck = TwitterTruck.find(params[:id])
+    @truck_tweets = Tweet.where(twitter_user_id: @truck.twitter_user_id).order(tweet_created_at: :desc)
   end
 
   # GET /twitter_trucks/new

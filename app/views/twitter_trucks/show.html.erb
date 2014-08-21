@@ -9,18 +9,13 @@
   <strong>User name:</strong>
   <%= @twitter_truck.name %>
 </p>
-
-<p>
-  <strong>Image path:</strong>
-  <%= @twitter_truck.image_url %>
-</p>
   
 <table>
   <tbody>
-    <% @twitter_truck.get_timeline(@twitter_truck.twitter_screen_name).each do |tweet| %>
+    <% @truck_tweets.each do |tweet| %>
       <tr>
         <td><%= tweet.text %></td>
-        <td><%= tweet.created_at %></td>
+        <td><%= tweet.tweet_created_at %></td>
       </tr>
     <% end %>
   </tbody>
