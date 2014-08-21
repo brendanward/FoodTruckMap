@@ -1,6 +1,7 @@
 class Tweet < ActiveRecord::Base
   before_save :clean_text
   include TwitterAccessor
+  include RegexpBuilder
   
   @@last_updated = nil
   
@@ -59,21 +60,51 @@ class Tweet < ActiveRecord::Base
     status[:resources][:lists]
   end
   
+  def clean_text_for_regex
+    text = self.text.downcase.partition(/(tomorrow|sunday|sun|monday|mon|tuesday|tue|wednesday|wed|thrusday|thur|friday|fri|saturday|sat)/)[0]
+    text = text.gsub(/\$[0-9]+/i,"") #removes $ amounts
+    text = text.gsub(/[0-9]+:[0-9]+/i,"") #removes times written as 1:00
+    text = text.gsub(/((\([0-9]{3}\))\W*|[0-9]{3}-?)?[0-9]{3}-?[0-9]{4}/i,"") #removes phone number
+    text = text.gsub(/(@|#)[a-z]+/i,"") #removes hashtags and retweets
+    #text = text.gsub(/[0-9]//[0-9]/i,"") #attempt at removing dates (not working)
+    return text
+  end
+  
   def contains_address?
-    address = AddressExtractor.extract_address(self.text)
-    return address.length > 0
+    match = get_regexp(final_regexp_string).match(clean_text_for_regex)
+    return !match.nil?
   end
   
   def extract_address
-    AddressExtractor.extract_address(self.text)
+    match = get_regexp(final_regexp_string).match(clean_text_for_regex)
+    
+    return "" if match.nil?
+
+    address = match[0]
+    
+    return AddressExtractor.clean_address(address)
   end
   
   def extract_city
-    AddressExtractor.extract_city(self.text)
+    AddressExtractor.extract_city(clean_text_for_regex)
   end
   
   def get_coordinates
-    AddressExtractor.geocode_address(self.extract_address,self.extract_city)
+    full_address = self.extract_address << ", " << self.extract_city
+    coordinate = Coordinate.find_by address: full_address
+    
+    if coordinate.nil?
+      address_coordinate = AddressExtractor.geocode_address(self.extract_address,self.extract_city)
+            
+      coordinate = Coordinate.new
+      coordinate.address = full_address
+      coordinate.latitude = address_coordinate[0]
+      coordinate.longitude = address_coordinate[1]
+
+      coordinate.save unless address_coordinate[0].nil? || address_coordinate[1].nil?
+    end
+    
+    return [coordinate.latitude,coordinate.longitude]
   end
 
 end

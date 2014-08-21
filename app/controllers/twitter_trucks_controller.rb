@@ -24,9 +24,9 @@ class TwitterTrucksController < ApplicationController
     
     @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
       coordinates = tweet.get_coordinates
-      sleep(1.0/8.0) #/
+      #sleep(1.0/8.0) #/
       
-      if coordinates[0] != nil and coordinates[1] != nil
+      unless coordinates[0].nil? || coordinates[1].nil?
         marker.lat coordinates[0]
         marker.lng coordinates[1]
         marker.infowindow render_to_string(:partial => "/twitter_trucks/infowindow", :locals => { :tweet => tweet})
@@ -43,6 +43,14 @@ class TwitterTrucksController < ApplicationController
   def show
     @truck = TwitterTruck.find(params[:id])
     @truck_tweets = Tweet.where(twitter_user_id: @truck.twitter_user_id).order(tweet_created_at: :desc)
+    @location_tweets = @truck_tweets.select do |tweet| tweet.contains_address? end
+    
+    @hash = Gmaps4rails.build_markers(@location_tweets) do |tweet, marker|
+      coordinates = tweet.get_coordinates
+      marker.lat coordinates[0]
+      marker.lng coordinates[1]
+      marker.infowindow render_to_string(:partial => "/tweets/infowindow", :locals => { :tweet => tweet})
+    end
   end
 
   # GET /twitter_trucks/new

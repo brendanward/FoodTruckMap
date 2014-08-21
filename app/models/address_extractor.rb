@@ -34,11 +34,13 @@ class AddressExtractor
   def self.clean_address(address)
     return "" if address == nil
 
+    address.delete!("!")
     address = address.gsub(/mad\b/i," Madison ")
     address = address.gsub(/lex\b/i," Lexington ")
     address = address.gsub("&"," and ")
     address = address.gsub("@"," and ")
     address = address.gsub("betw "," between ")
+    #address = address.gsub(/b.{0,2}w.{0,2}n/i," between ")
     address = address.gsub("btwn"," between ")
     address = address.gsub(/\Wbw\W/i," between ")
     address = address.gsub("btw"," between ")
@@ -47,6 +49,7 @@ class AddressExtractor
     address = address.gsub(/b\/w/i," between ")
     address = address.gsub("b\\t "," between ")
     address = address.gsub("b\\w"," between ")
+    address = address.gsub(" in between "," between ")
     
     address = address.gsub("/"," and ")
     address = address.gsub("\\"," and ")
@@ -68,7 +71,6 @@ class AddressExtractor
 
 
   def self.extract_city(tweet_text)
-    tweet_text = tweet_text.downcase
     address = ""
     
     if Regexp.new("(^|\\W+)#{AddressExtractor.regExpType(BrooklynNames)}($|\\W+)", Regexp::IGNORECASE).match(tweet_text)
@@ -98,10 +100,10 @@ address = "New York, NY"
       bounds = [[40.546279,-73.665047],[40.804056,-73.998756]]      
     end
     
-    if address.include?("between")
+    unless address[/AddressExtractor.regExpType(BetweenTypes)/].nil?
     #if Truck.build_between_regexp.match(address)  
-      first_street = Regexp.new(".+(?=\\W+between)", Regexp::IGNORECASE).match(address)
-      first_cross_street = Regexp.new("(?<=between\\s).+(?=\\sand)", Regexp::IGNORECASE).match(address)
+      first_street = Regexp.new(".+(?=\\W+AddressExtractor.regExpType(BetweenTypes))", Regexp::IGNORECASE).match(address)
+      first_cross_street = Regexp.new("(?<=AddressExtractor.regExpType(BetweenTypes)\\s).+(?=\\sand)", Regexp::IGNORECASE).match(address)
       second_cross_street = Regexp.new("(?<=\\Wand\\W).+", Regexp::IGNORECASE).match(address)
       
       #puts "Between Geocoding: " << address,first_street,first_cross_street,second_cross_street

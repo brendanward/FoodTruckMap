@@ -1,9 +1,23 @@
-<h1><%= @tweet.text %></h1>
-
-  <!-- <%= AddressExtractor.build_regexp.match(@tweet.text) %> -->
-
-
-
+<h3><%= @tweet.text %></h3>
+<br/>
+<%= @tweet.extract_address %>
+<br/>
+<br/>
+<%= @tweet.get_regexp(@tweet.include_between).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.include_between).match(@tweet.text).nil? %>
+<br/>
+<br/>
+<%= @tweet.get_regexp(@tweet.intersection).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.intersection).match(@tweet.text).nil? %>
+<br/>
+<br/>
+<%= @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text).nil? %>
+<br/>
+<br/>
+<%= @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text).nil? %>
+<br/>
+<br/>
+<%= @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text).nil? %>
+<br/>
+<br/>
 
 <%= link_to 'Back', root_path %>
 
