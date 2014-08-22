@@ -24,11 +24,23 @@ module RegexpBuilder
 
 #including "-" as an and fixes some problems and causes others
   def intersection
-    "#{full_street_names}\\W*((and|n|\\/|-|\\|\\+|&|&amp;|@)\\W*)+#{full_street_names}"
+    "#{full_street_names}\\W*(and|n|\\/|\\|\\+|&|&amp;|@)\\W*#{full_street_names}"
+  end
+
+  def intersection_first_street
+    "#{full_street_names}(?=\\W*and\\W*)"
+  end
+
+  def intersection_second_street
+    "(?<=\\Wand\\W)#{full_street_names}"
   end
 
   def include_between
-    "(#{full_street_names}\\W*(in\\W)?#{regExpType(BetweenTypes)}\\W*)?#{intersection}"
+    "#{full_street_names}(\\W*((in\\W)?#{regExpType(BetweenTypes)})?\\W*|\\W+)#{intersection}"
+  end
+
+  def between_address_first_part
+    "#{full_street_names}(?=\\W*((in\\W)?#{regExpType(BetweenTypes)}|#{intersection}))"
   end
 
   def street_address
@@ -36,7 +48,7 @@ module RegexpBuilder
   end
 
   def final_regexp_string
-    "(#{include_between}|#{street_address})"
+    "(#{include_between}|#{intersection}|#{street_address})"
   end
 
   def get_regexp(regexp_text)

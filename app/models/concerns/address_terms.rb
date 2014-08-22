@@ -30,8 +30,8 @@ module AddressTerms
     "slip"
   ]
 
-  StreetPrefixSuffix = ["north","south","east","west","n","s","e","w","n.","s.","e.","w."]
+  StreetPrefixSuffix = ["north","south","east","west","n","s","e","w","n/.","s/.","e/.","w/."]
   
-  BetweenTypes = ["b.{0,3}w.{0,2}n","bet","bw","b/w","b/t","\\s"]
+  BetweenTypes = ["b.{0,3}w.{0,2}n","bet","bw","b/w","b/t","bt","\\s"]
   
 end

@@ -38,4 +38,5 @@
 </script>
 
 <%= link_to 'Edit', edit_coordinate_path(@coordinate) %> |
+<%= link_to 'Destroy', @coordinate, method: :delete, data: { confirm: 'Are you sure?' } %>
 <%= link_to 'Back', coordinates_path %>

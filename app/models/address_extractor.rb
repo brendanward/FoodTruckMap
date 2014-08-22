@@ -37,6 +37,8 @@ class AddressExtractor
     address.delete!("!")
     address = address.gsub(/mad\b/i," Madison ")
     address = address.gsub(/lex\b/i," Lexington ")
+    address = address.gsub(/bway\b/i," Broadway ")
+    address = address.gsub(/b'way\b/i," Broadway ")
     address = address.gsub("&"," and ")
     address = address.gsub("@"," and ")
     address = address.gsub("betw "," between ")
@@ -55,6 +57,7 @@ class AddressExtractor
     address = address.gsub("\\"," and ")
     
     address = address.strip
+    #return address.squeeze!(" ")
     return address
   end
 

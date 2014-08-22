@@ -66,7 +66,17 @@ class Tweet < ActiveRecord::Base
     text = text.gsub(/[0-9]+:[0-9]+/i,"") #removes times written as 1:00
     text = text.gsub(/((\([0-9]{3}\))\W*|[0-9]{3}-?)?[0-9]{3}-?[0-9]{4}/i,"") #removes phone number
     text = text.gsub(/(@|#)[a-z]+/i,"") #removes hashtags and retweets
+    text = text.gsub(/(from|today|tomorrow|tom)\W*[0-9]+\W*(-|to)\W*[0-9]+/i,"") #remove time ranges
+    text = text.gsub(/[0-9]+\W*(-|to)\W*[0-9]+\W*(from|today|tomorrow|tom)/i,"") #remove time ranges
+    text = text.gsub(/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}/i,"") #remove full dates
+    text = text.gsub(/(jan|january|feb|february|march|april|may|june|july|aug|august|sep|september|oct|october|nov|november|dec|december)\W*[0-9]+\S?[0-9]+/i,"")
+    text = text.gsub("(,|\.)","")
     #text = text.gsub(/[0-9]//[0-9]/i,"") #attempt at removing dates (not working)
+    
+    text = text.gsub(/(?<=1)\s/i,"st ")
+    text = text.gsub(/(?<=2)\s/i,"nd ")
+    text = text.gsub(/(?<=3)\s/i,"rd ")
+    text = text.gsub(/(?<=(4|5|6|7|8|9|0))\s/i,"th ")
     return text
   end
   
@@ -89,19 +99,27 @@ class Tweet < ActiveRecord::Base
     AddressExtractor.extract_city(clean_text_for_regex)
   end
   
+  def extract_full_address
+    self.extract_address << ", " << self.extract_city
+  end
+  
   def get_coordinates
-    full_address = self.extract_address << ", " << self.extract_city
+    full_address = self.extract_full_address
     coordinate = Coordinate.find_by address: full_address
     
     if coordinate.nil?
-      address_coordinate = AddressExtractor.geocode_address(self.extract_address,self.extract_city)
-            
       coordinate = Coordinate.new
       coordinate.address = full_address
-      coordinate.latitude = address_coordinate[0]
-      coordinate.longitude = address_coordinate[1]
+      coordinate.geocode_address
+      
+      #address_coordinate = AddressExtractor.geocode_address(self.extract_address,self.extract_city)
+            
+      #coordinate = Coordinate.new
+      #coordinate.address = full_address
+      #coordinate.latitude = address_coordinate[0]
+      #coordinate.longitude = address_coordinate[1]
 
-      coordinate.save unless address_coordinate[0].nil? || address_coordinate[1].nil?
+      coordinate.save unless coordinate.latitude.nil? || coordinate.longitude.nil?
     end
     
     return [coordinate.latitude,coordinate.longitude]

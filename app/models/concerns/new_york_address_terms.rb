@@ -1,6 +1,6 @@
 module NewYorkAddressTerms
 
-  BrooklynNames = ["bk","brooklyn","bklyn","dumbo","dumbonyc","downtownbklyn"]
+  BrooklynNames = ["bk","brooklyn","bklyn","dumbo","dumbonyc","downtownbklyn","fort green","ft green","williamsburg","park slope","carroll"]
 
   QueensNames = ["queens","astoria"]
 
@@ -40,7 +40,7 @@ module NewYorkAddressTerms
     "bryant",
     "cabrini",
     "canal",
-    "central",
+    "(?<!grand\s)central",
     "centre",
     "chambers",
     "charles",
@@ -72,7 +72,7 @@ module NewYorkAddressTerms
     "gouveneur",
     "gouvener",
     "gramercy",
-    "grand",
+    "grand(?!\scentral)",
     "great jones",
     "greene",
     "greenwich",

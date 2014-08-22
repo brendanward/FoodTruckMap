@@ -2,6 +2,7 @@ class TweetsController < ApplicationController
   before_action :set_tweet, only: [:show]
   
   def show
+    @coordinate = Coordinate.find_by address: @tweet.extract_full_address
   end
   
    private

@@ -1,23 +1,34 @@
 <h3><%= @tweet.text %></h3>
 <br/>
-<%= @tweet.extract_address %>
+<%= @tweet.extract_full_address %>
 <br/>
 <br/>
-<%= @tweet.get_regexp(@tweet.include_between).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.include_between).match(@tweet.text).nil? %>
+include_between <%= @tweet.get_regexp(@tweet.include_between).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.include_between).match(@tweet.text).nil? %>
 <br/>
 <br/>
-<%= @tweet.get_regexp(@tweet.intersection).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.intersection).match(@tweet.text).nil? %>
+intersection <%= @tweet.get_regexp(@tweet.intersection).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.intersection).match(@tweet.text).nil? %>
 <br/>
 <br/>
-<%= @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text).nil? %>
+full_street_names <%= @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text).nil? %>
 <br/>
 <br/>
-<%= @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text).nil? %>
+all_street_names <%= @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text).nil? %>
 <br/>
 <br/>
-<%= @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text).nil? %>
+cardinal_street_names <%= @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text).nil? %>
 <br/>
 <br/>
 
+between_address_first_part <%= @tweet.get_regexp(@tweet.between_address_first_part).match(@tweet.extract_address)[0] unless @tweet.get_regexp(@tweet.between_address_first_part).match(@tweet.extract_address).nil? %>
+<br/>
+<br/>
+intersection_first_street <%= @tweet.get_regexp(@tweet.intersection_first_street).match(@tweet.extract_address)[0] unless @tweet.get_regexp(@tweet.intersection_first_street).match(@tweet.extract_address).nil? %>
+<br/>
+<br/>
+intersection_second_street <%= @tweet.get_regexp(@tweet.intersection_second_street).match(@tweet.extract_address)[0] unless @tweet.get_regexp(@tweet.intersection_second_street).match(@tweet.extract_address).nil? %>
+<br/>
+<br/>
+
+<%= link_to "Show Coordinate", @coordinate %>
 <%= link_to 'Back', root_path %>
 

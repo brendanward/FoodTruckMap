@@ -7,26 +7,26 @@ class TwitterTrucksController < ApplicationController
     TwitterTruck.update_trucks
     Tweet.update_tweets
     
-    truck_tweets = Hash.new
+    @truck_tweets = Hash.new
     current_date = DateTime.now.in_time_zone("EST").beginning_of_day
     
     tweets = Tweet.where("tweet_created_at >= '#{current_date.to_s}'").order(tweet_created_at: :desc)
     
-    tweets.each { |tweet| truck_tweets[tweet.twitter_user_id] = tweet if !truck_tweets[tweet.twitter_user_id] && tweet.contains_address? }
+    tweets.each { |tweet| @truck_tweets[tweet.twitter_user_id] = tweet if !@truck_tweets[tweet.twitter_user_id] && tweet.contains_address? && !tweet.get_coordinates[0].nil?}
     
     @trucks_without_location = []
     @all_trucks = Hash.new
     
     TwitterTruck.all.each do |truck|
       @all_trucks[truck.twitter_user_id] = truck
-      @trucks_without_location << truck if !truck_tweets[truck.twitter_user_id]
+      @trucks_without_location << truck if @truck_tweets[truck.twitter_user_id].nil?
     end
     
-    @hash = Gmaps4rails.build_markers(truck_tweets.values) do |tweet, marker|
+    @hash = Gmaps4rails.build_markers(@truck_tweets.values) do |tweet, marker|
       coordinates = tweet.get_coordinates
       #sleep(1.0/8.0) #/
       
-      unless coordinates[0].nil? || coordinates[1].nil?
+      #unless coordinates[0].nil? || coordinates[1].nil?
         marker.lat coordinates[0]
         marker.lng coordinates[1]
         marker.infowindow render_to_string(:partial => "/twitter_trucks/infowindow", :locals => { :tweet => tweet})
@@ -34,7 +34,7 @@ class TwitterTrucksController < ApplicationController
                        "url" => @all_trucks[tweet.twitter_user_id].image_url,
                        "width" =>  40,
                        "height" => 40})
-      end
+      #end
     end
   end
 
