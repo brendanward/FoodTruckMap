@@ -65,7 +65,7 @@ class Tweet < ActiveRecord::Base
     text = text.gsub(/\$[0-9]+/i,"") #removes $ amounts
     text = text.gsub(/[0-9]+:[0-9]+/i,"") #removes times written as 1:00
     text = text.gsub(/((\([0-9]{3}\))\W*|[0-9]{3}-?)?[0-9]{3}-?[0-9]{4}/i,"") #removes phone number
-    text = text.gsub(/(@|#)[a-z]+/i,"") #removes hashtags and retweets
+    text = text.gsub(/(@|#)[a-z0-9]+/i,"") #removes hashtags and retweets
     text = text.gsub(/(from|today|tomorrow|tom)\W*[0-9]+\W*(-|to)\W*[0-9]+/i,"") #remove time ranges
     text = text.gsub(/[0-9]+\W*(-|to)\W*[0-9]+\W*(from|today|tomorrow|tom)/i,"") #remove time ranges
     text = text.gsub(/[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}/i,"") #remove full dates

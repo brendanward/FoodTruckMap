@@ -11,7 +11,7 @@ module RegexpBuilder
   end
 
   def all_street_names
-    "(#{cardinal_street_names}|#{regExpType(NewYorkStreetNames)})"
+    "(#{regExpType(NewYorkStreetNames)}|#{cardinal_street_names})"
   end
 
   def full_street_names
