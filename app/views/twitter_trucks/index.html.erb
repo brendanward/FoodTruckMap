@@ -48,7 +48,7 @@
       <div class="modal-body">
         <ul>
           <% @truck_tweets.values.each do |tweet| %>
-          <li><%= @all_trucks[tweet.twitter_user_id].name %> <%= tweet.text %> <%= tweet.extract_address %> <%= tweet.get_coordinates[0].nil? %></li>
+          <li><%= @all_trucks[tweet.twitter_user_id].name %> <%= tweet.text %> <%= tweet.extract_address %> <%= tweet.get_coordinate.latitude.nil? %></li>
             <% end %>
         </ul>
       </div>

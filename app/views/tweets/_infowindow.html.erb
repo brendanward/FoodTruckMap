@@ -1,5 +1,6 @@
 
 <h2><%= tweet.text %></h2>
 <h3><%= tweet.tweet_created_at.to_s.in_time_zone("EST") %></h3>
+<h3><%= tweet.clean_text_for_regex %></h3>
 <h3><%= tweet.extract_address << ", " << tweet.extract_city %></h3>
 <%= link_to "Show Tweet", tweet %>

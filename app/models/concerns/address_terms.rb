@@ -1,6 +1,7 @@
 module AddressTerms
   
   CardinalSuffix = ['st','nd','rd','th']
+  #CardinalSuffix = ["[s|n|r|t][a-z]","[a-z][t|d|h]"]
   
   StreetTypes =
   [

@@ -22,6 +22,16 @@ def update_twitter_trucks(date)
   end
 end
 
+def update_coordinates
+  coordinates = Coordinate.all
+  
+  coordinates.each do |c|
+    c.geocode_address
+    c.save unless c.latitude.nil? || c.longitude.nil?
+    sleep(1.0/8.0) #/
+  end
+end
+
 
 
 

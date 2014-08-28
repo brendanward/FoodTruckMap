@@ -19,6 +19,7 @@ class CoordinatesController < ApplicationController
   end
 
   def edit
+    @coordinate.geocode_address
   end
 
   def create

@@ -3,19 +3,28 @@
 <%= @tweet.extract_full_address %>
 <br/>
 <br/>
-include_between <%= @tweet.get_regexp(@tweet.include_between).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.include_between).match(@tweet.text).nil? %>
+<%= @tweet.clean_text_for_regex %>
 <br/>
 <br/>
-intersection <%= @tweet.get_regexp(@tweet.intersection).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.intersection).match(@tweet.text).nil? %>
+<%= @coordinate.clean_address_for_geocoder %>
 <br/>
 <br/>
-full_street_names <%= @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.full_street_names).match(@tweet.text).nil? %>
+street_address <%= @tweet.get_regexp(@tweet.street_address).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.street_address).match(@tweet.clean_text_for_regex).nil? %>
 <br/>
 <br/>
-all_street_names <%= @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.all_street_names).match(@tweet.text).nil? %>
+include_between <%= @tweet.get_regexp(@tweet.include_between).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.include_between).match(@tweet.clean_text_for_regex).nil? %>
 <br/>
 <br/>
-cardinal_street_names <%= @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text)[0] unless @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.text).nil? %>
+intersection <%= @tweet.get_regexp(@tweet.intersection).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.intersection).match(@tweet.clean_text_for_regex).nil? %>
+<br/>
+<br/>
+full_street_names <%= @tweet.get_regexp(@tweet.full_street_names).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.full_street_names).match(@tweet.clean_text_for_regex).nil? %>
+<br/>
+<br/>
+all_street_names <%= @tweet.get_regexp(@tweet.all_street_names).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.all_street_names).match(@tweet.clean_text_for_regex).nil? %>
+<br/>
+<br/>
+cardinal_street_names <%= @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.clean_text_for_regex)[0] unless @tweet.get_regexp(@tweet.cardinal_street_names).match(@tweet.clean_text_for_regex).nil? %>
 <br/>
 <br/>
 

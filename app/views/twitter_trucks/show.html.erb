@@ -21,13 +21,30 @@
   </div>
   <div id="map" style='width: 800px; height: 400px;'></div>
 </div>
-  
+
+<h2>Bad Coordinates</h2>
+<table>
+  <tbody>
+    <% @bad_coordinate_tweets.each do |tweet| %>
+      <tr>
+        <td><%= link_to tweet.text, tweet %></td>
+        <td><%= tweet.tweet_created_at %></td>
+        <td><%= tweet.contains_address? %></td>
+        <td><%= tweet.clean_text_for_regex %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<h2>All Tweets</h2>
 <table>
   <tbody>
     <% @truck_tweets.each do |tweet| %>
       <tr>
         <td><%= link_to tweet.text, tweet %></td>
         <td><%= tweet.tweet_created_at %></td>
+        <td><%= tweet.contains_address? %></td>
+        <td><%= tweet.clean_text_for_regex %></td>
       </tr>
     <% end %>
   </tbody>

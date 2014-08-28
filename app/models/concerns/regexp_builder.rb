@@ -36,11 +36,11 @@ module RegexpBuilder
   end
 
   def include_between
-    "#{full_street_names}(\\W*((in\\W)?#{regExpType(BetweenTypes)})?\\W*|\\W+)#{intersection}"
+    "#{full_street_names}(\\W*(between|\\s)+\\W*|\\W+)#{intersection}"
   end
 
   def between_address_first_part
-    "#{full_street_names}(?=\\W*((in\\W)?#{regExpType(BetweenTypes)}|#{intersection}))"
+    "#{full_street_names}(?=\\W*(between|\\s)|#{intersection})"
   end
 
   def street_address
@@ -49,6 +49,14 @@ module RegexpBuilder
 
   def final_regexp_string
     "(#{include_between}|#{intersection}|#{street_address})"
+  end
+
+  def brooklyn_regexp
+    "(^|\\W+)#{regExpType(BrooklynNames)}($|\\W+)"
+  end
+
+  def queens_regexp
+    "(^|\\W+)#{regExpType(QueensNames)}($|\\W+)"
   end
 
   def get_regexp(regexp_text)

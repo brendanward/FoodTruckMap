@@ -4,8 +4,6 @@ Rails.application.routes.draw do
 
   resources :twitter_trucks
   resources :tweets
-
-  resources :trucks
   resources :coordinates
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -15,7 +13,7 @@ Rails.application.routes.draw do
   #root 'trucks#index'
   root 'twitter_trucks#index'
   
-  get 'history/' => 'trucks#history'
+  #get 'history/' => 'trucks#history'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

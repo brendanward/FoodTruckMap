@@ -2,10 +2,58 @@ class Coordinate < ActiveRecord::Base
   validates_uniqueness_of :address
   include RegexpBuilder
   
-  def geocode_address
-    address = self.address.partition(/,[^,]+,\s\S{2}\z/i) [0]
-    city_state = self.address.match(/[^,]+,\s\S{2}\z/i) [0].strip!
+  @@all_coordinates = nil
+  
+  def self.find_coordinate(address)
+    if @@all_coordinates.nil?
+      @@all_coordinates = Hash.new
+      Coordinate.all.each { |c| @@all_coordinates[c.address] = c }
+    end
     
+    coordiante = @@all_coordinates[address]
+    
+    if coordiante.nil?
+      coordinate = Coordinate.new
+      coordinate.address = address
+      coordinate.geocode_address
+      coordinate.save
+      @@all_coordinates[address] = coordinate
+      return coordinate
+    end
+    
+    return coordiante
+  end
+  
+  def clean_address_for_geocoder
+    clean_address = self.address.delete("!")
+
+    clean_address = clean_address.gsub("&"," and ")
+    clean_address = clean_address.gsub("@"," and ")
+    
+    clean_address = clean_address.gsub("/"," and ")
+    clean_address = clean_address.gsub("\\"," and ")
+    
+    clean_address = clean_address.gsub(/(?<=[0-9])av/i,' av')
+    clean_address = clean_address.gsub(/(?<=[2-90])st/i,' st')
+    
+    clean_address = clean_address.gsub(/(?<=11)\s/i,'th ')
+    clean_address = clean_address.gsub(/(?<=12)\s/i,'th ')
+    clean_address = clean_address.gsub(/(?<=13)\s/i,'th ')
+    clean_address = clean_address.gsub(/(?<=1)\s/i,'st ')
+    clean_address = clean_address.gsub(/(?<=2)\s/i,'nd ')
+    clean_address = clean_address.gsub(/(?<=3)\s/i,'rd ')
+    clean_address = clean_address.gsub(/(?<=(4|5|6|7|8|9|0))\s/i,'th ')
+    
+    clean_address = clean_address.strip
+    return clean_address.squeeze(" ")
+  end
+  
+  def geocode_address
+    clean_address = clean_address_for_geocoder
+    return if clean_address.length == 0
+    address = clean_address.partition(/,[^,]+,\s\S{2}\z/i) [0]
+    city_state = clean_address.match(/[^,]+,\s\S{2}\z/i) [0].strip!
+
     bounds = []
     
     case city_state
@@ -29,7 +77,7 @@ class Coordinate < ActiveRecord::Base
       
       first_intersection = first_street[0] + " and " + first_cross_street[0] + ", " + city_state
       second_intersection = first_street[0] + " and " + second_cross_street[0] + ", " + city_state
-      
+
       first_geocode = Geocoder.search(first_intersection, :bounds => bounds)
       second_geocode = Geocoder.search(second_intersection, :bounds => bounds)
       
@@ -38,7 +86,7 @@ class Coordinate < ActiveRecord::Base
         self.longitude = (first_geocode[0].coordinates()[1] + second_geocode[0].coordinates()[1])/2 #/
       end
     else
-      geocode = Geocoder.search(self.address, :bounds => bounds)
+      geocode = Geocoder.search(clean_address_for_geocoder, :bounds => bounds)
       
       unless geocode[0].nil? 
         self.latitude = geocode[0].coordinates()[0]
